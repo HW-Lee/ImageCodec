@@ -1,3 +1,18 @@
+# Mac Directory
+*.DS_Store
+
+# Generated Data
+*bitstream*
+*decompressed*
+
+# OmniGraffle files
+*.graffle*
+
+# LATEX files
+*.aux
+*.log
+*.synctex.gz
+
 # Compiled Object files
 *.slo
 *.lo

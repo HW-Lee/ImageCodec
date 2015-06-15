@@ -1,0 +1,41 @@
+%!TEX encoding = UTF-8 Unicode
+\documentclass[12pt]{article} 
+\usepackage[left=0.75in,top=0.7in,right=0.75in,bottom=0.3in]{geometry} % Document margins
+\usepackage{CJK}
+\usepackage{graphicx}
+\usepackage{mathtools}
+\usepackage{mathrsfs}
+\usepackage{amssymb}
+\usepackage{hyperref}
+\usepackage{sidecap}
+\usepackage{makecell}
+
+\makeatletter
+\renewenvironment{itemize}
+{\list{$\bullet$}{\leftmargin\z@ \labelwidth\z@ \itemindent-\leftmargin
+\let\makelabel\descriptionlabel}}
+{\endlist}
+\makeatother
+
+\begin{CJK}{UTF8}{bsmi}
+\title{\textbf{Project Status / Image Coding Contest }}
+\author{\textbf{李豪韋 103061527} \\ \textbf{陳俐安 101061117}}
+\date{}
+
+\begin{document}
+\vspace*{-60pt}
+    {\let\newpage\relax\maketitle}
+
+\section*{Status}
+\vspace{-20pt}
+\noindent\makebox[\linewidth]{\rule{\textwidth}{0.4pt}}
+\vspace{5pt}
+
+目前尚未實作，僅稍微規劃其結構。基本架構會採用transform coding \& predictive coding，先以無損壓縮開始研究，之後才會去研究quantization的部分。關於quantization有幾種選擇的方法：對於將256個數字縮到N個，無疑是開出N個區間然後將每一個值指定為對應區間的代表值，可以使用 1) k-means clustering, 2) 用machine learning的方法找出能讓predicted residual entropy最低的區間分法。目前還未知，但是k-means clustering的方法應該比較易於實作，不曉得老師有無任何建議？
+
+目前找到的paper：
+\href{http://sun.aei.polsl.pl/~rstaros/papers/s2006-spe-sfalic.pdf}{Simple Fast and Adaptive Lossless Image Compression Algorithm, Roman Starosolski}
+
+
+\end{CJK}
+\end{document}
