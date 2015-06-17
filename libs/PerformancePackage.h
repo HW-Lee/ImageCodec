@@ -12,6 +12,7 @@
 #include <iostream>
 #include <math.h>
 #include <string>
+#include <fstream>
 #include "YUVImage.h"
 
 using namespace std;
@@ -34,6 +35,7 @@ public:
 	CompressionParameters* clone();
 
 	void info();
+	void info(ofstream &s);
 
 	long bitsCount();
 	double afterAdjust(int format);
@@ -103,6 +105,21 @@ void CompressionParameters::info() {
 	if (isWithAdjust) { cout << "Q_res: " << Q_res << endl; }
 }
 
+void CompressionParameters::info(ofstream &s) {
+	s << "Area: " << this->imageArea << ", ";
+	s << "DownSampleScale: (" << wscale << ", " << hscale << ")" << ", ";
+	s << "(mk_y, mk_u, mk_v) = (" << mk_y << ", " << mk_u << ", " << mk_v << ")" << endl;
+	s << "PredictorID: " << predictorID << ", " << "KmeansTableSize: " << N_k << ", ";
+	s << "mk_table: " << mk_table << ", " << "WL_max: " << WL_max << endl;
+	s << "kmeansTableBitrate: " << kmeansTableBitrate << ", PSNR: " << PSNR << ", ";
+	s << "AdjustBitrate: " << adjustBitrate << endl;
+	s << "withAdjustBitrate: ";
+	for (int i = 0; i < 3; i++) { s << afterAdjust(i); if (i < 2) s << ", "; }
+	s << endl;
+	s << "isWithAdjust: " << ((isWithAdjust) ? "Y":"N") << endl;
+	if (isWithAdjust) { s << "Q_res: " << Q_res << endl; }
+}
+
 long CompressionParameters::bitsCount() {
 	long cnt = 0;
 	int k_y = (1 << this->mk_y), k_u = (1 << this->mk_u), k_v = (1 << this->mk_v);
@@ -133,6 +150,7 @@ public:
 	void submit(CompressionParameters* par);
 	void anneal(int opt);
 	void info();
+	void info(ofstream &s);
 
 	string getName();
 	int getParametersCount();
@@ -176,33 +194,12 @@ PerformancePackage* PerformancePackage::getInstance(string name) {
 void PerformancePackage::clear() { this->parameters.clear(); }
 
 void PerformancePackage::submit(CompressionParameters* par) {
-	// cout << "submit a par:" << endl;
-	// par->info();
-	// cout << "--------------------------" << endl;
 	if (this->parameters.size() == 0) { this->parameters.push_back(par->clone()); return; }
 	int searchIdx = 0;
 	for (int i = 0; i < this->parameters.size(); i++) {
 		if (this->parameters[i]->PSNR < par->PSNR) { this->parameters.insert(this->parameters.begin()+i, par->clone()); return; }
 	}
 	this->parameters.push_back(par->clone());
-	// int minSearchIdx = 0;
-	// int maxSearchIdx = (this->parameters.size() > 0) ? this->parameters.size()-1:0;
-	// while (maxSearchIdx - minSearchIdx > 1) {
-	// 	int curSearchIdx = (minSearchIdx + maxSearchIdx)/2;
-	// 	if (this->parameters[curSearchIdx]->PSNR > par->PSNR) { minSearchIdx = curSearchIdx; }
-	// 	else if (this->parameters[curSearchIdx]->PSNR < par->PSNR) { maxSearchIdx = curSearchIdx; }
-	// 	else { minSearchIdx = curSearchIdx; maxSearchIdx = curSearchIdx; }
-	// }
-	// double parBitrate = (par->isWithAdjust) ? par->afterAdjust(YUVImage::FORMAT_4_2_0):par->kmeansTableBitrate;
-	// double minBitrate = this->parameters[minSearchIdx]->isWithAdjust ? 
-	// 		this->parameters[minSearchIdx]->afterAdjust(YUVImage::FORMAT_4_2_0) : this->parameters[minBitrate]->kmeansTableBitrate;
-	// double maxBitrate = this->parameters[maxSearchIdx]->isWithAdjust ? 
-	// 		this->parameters[maxSearchIdx]->afterAdjust(YUVImage::FORMAT_4_2_0) : this->parameters[maxSearchIdx]->kmeansTableBitrate;
-	// if (this->parameters[minSearchIdx]->PSNR == par->PSNR && parBitrate < minBitrate) { this->parameters[minBitrate] = par->clone(); }
-	// else if (this->parameters[maxSearchIdx]->PSNR == par->PSNR && parBitrate < maxBitrate) { this->parameters[maxBitrate] = par->clone(); }
-	// else if (this->parameters[minSearchIdx]->PSNR < par->PSNR) { this->parameters.insert(this->parameters.begin()+minSearchIdx, par->clone()); }
-	// else if (this->parameters[maxSearchIdx]->PSNR > par->PSNR) { this->parameters.push_back(par->clone()); }
-	// else { this->parameters.insert(this->parameters.begin()+maxSearchIdx, par->clone()); }
 }
 
 void PerformancePackage::anneal(int opt) {
@@ -219,6 +216,14 @@ void PerformancePackage::info() {
 		cout << "parameters[" << i << "]: " << endl;
 		this->parameters[i]->info();
 		cout << endl << "---------------------------------------" << endl;
+	}
+}
+
+void PerformancePackage::info(ofstream &s) {
+	for (int i = 0; i < this->parameters.size(); i++) {
+		s << "parameters[" << i << "]: " << endl;
+		this->parameters[i]->info(s);
+		s << endl << "---------------------------------------" << endl;
 	}
 }
 

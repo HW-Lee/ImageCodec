@@ -8,6 +8,7 @@
 
 #include <iostream>
 #include <math.h>
+#include <fstream>
 #include <sstream>
 #include "YUVImage.h"
 #include "ImageCodec.h"
@@ -20,7 +21,7 @@
 using namespace std;
 int main(int argc, const char * argv[]) {
 
-	int constWay = SKIP_ENCODING;
+	int constWay = CONSTRAINT_BY_BITRATE;
 
 	int opt = 3;
 	string PATHS[] = {
@@ -64,7 +65,10 @@ int main(int argc, const char * argv[]) {
 		ImageCodec::encodeTo(ss.str())->withImage(img)->withMaxBitrate(1.0)->run();
 	}
 
-	PerformancePackage::getInstance(path)->info();
+	ss.str(""); ss.clear(); ss << PATHS[opt+4] << "ParameterInfo.txt";
+	ofstream s(ss.str().c_str(), ios::out | ios::app);
+	PerformancePackage::getInstance(path)->info(s);
+	s.close();
 
 	YUVImage* img2;
 
