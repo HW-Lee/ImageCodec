@@ -1,0 +1,392 @@
+parameters[0]: 
+Area: 1504000, DownSampleScale: (1, 1), (mk_y, mk_u, mk_v) = (8, 8, 8)
+PredictorID: 8, KmeansTableSize: 195, mk_table: 0, WL_max: 22
+kmeansTableBitrate: 0, PSNR: 1000, AdjustBitrate: 3.89941
+withAdjustBitrate: 11.6982, 7.79882, 5.84911
+isWithAdjust: Y
+Q_res: 1
+
+---------------------------------------
+parameters[1]: 
+Area: 1504000, DownSampleScale: (1, 1), (mk_y, mk_u, mk_v) = (5, 0, 2)
+PredictorID: 8, KmeansTableSize: 107, mk_table: 5, WL_max: 21
+kmeansTableBitrate: 2.41749, PSNR: 47.4592, AdjustBitrate: 1.75691
+withAdjustBitrate: 7.68822, 5.93131, 5.05286
+isWithAdjust: Y
+Q_res: 2
+
+---------------------------------------
+parameters[2]: 
+Area: 1504000, DownSampleScale: (1, 1), (mk_y, mk_u, mk_v) = (5, 0, 1)
+PredictorID: 8, KmeansTableSize: 58, mk_table: 5, WL_max: 20
+kmeansTableBitrate: 2.02576, PSNR: 47.3497, AdjustBitrate: 1.83747
+withAdjustBitrate: 7.53817, 5.7007, 4.78196
+isWithAdjust: Y
+Q_res: 2
+
+---------------------------------------
+parameters[3]: 
+Area: 1504000, DownSampleScale: (1, 1), (mk_y, mk_u, mk_v) = (5, 0, 0)
+PredictorID: 8, KmeansTableSize: 32, mk_table: 5, WL_max: 18
+kmeansTableBitrate: 1.77584, PSNR: 47.3057, AdjustBitrate: 1.92491
+withAdjustBitrate: 7.55057, 5.62566, 4.6632
+isWithAdjust: Y
+Q_res: 2
+
+---------------------------------------
+parameters[4]: 
+Area: 1504000, DownSampleScale: (1, 1), (mk_y, mk_u, mk_v) = (5, 2, 2)
+PredictorID: 8, KmeansTableSize: 317, mk_table: 6, WL_max: 21
+kmeansTableBitrate: 2.83276, PSNR: 42.4578, AdjustBitrate: 1.01549
+withAdjustBitrate: 5.87922, 4.86374, 4.35599
+isWithAdjust: Y
+Q_res: 5
+
+---------------------------------------
+parameters[5]: 
+Area: 1504000, DownSampleScale: (1, 1), (mk_y, mk_u, mk_v) = (5, 1, 2)
+PredictorID: 8, KmeansTableSize: 189, mk_table: 5, WL_max: 21
+kmeansTableBitrate: 2.75122, PSNR: 42.3869, AdjustBitrate: 1.02714
+withAdjustBitrate: 5.83265, 4.8055, 4.29193
+isWithAdjust: Y
+Q_res: 5
+
+---------------------------------------
+parameters[6]: 
+Area: 1504000, DownSampleScale: (1, 1), (mk_y, mk_u, mk_v) = (5, 0, 2)
+PredictorID: 8, KmeansTableSize: 107, mk_table: 5, WL_max: 21
+kmeansTableBitrate: 2.41749, PSNR: 42.3026, AdjustBitrate: 1.07721
+withAdjustBitrate: 5.64913, 4.57192, 4.03331
+isWithAdjust: Y
+Q_res: 5
+
+---------------------------------------
+parameters[7]: 
+Area: 1504000, DownSampleScale: (1, 1), (mk_y, mk_u, mk_v) = (5, 2, 1)
+PredictorID: 8, KmeansTableSize: 186, mk_table: 5, WL_max: 20
+kmeansTableBitrate: 2.40494, PSNR: 42.0549, AdjustBitrate: 1.02361
+withAdjustBitrate: 5.47577, 4.45216, 3.94036
+isWithAdjust: Y
+Q_res: 5
+
+---------------------------------------
+parameters[8]: 
+Area: 1504000, DownSampleScale: (1, 1), (mk_y, mk_u, mk_v) = (5, 2, 2)
+PredictorID: 8, KmeansTableSize: 317, mk_table: 6, WL_max: 21
+kmeansTableBitrate: 2.83276, PSNR: 42.0529, AdjustBitrate: 0
+withAdjustBitrate: 2.83276, 2.83276, 2.83276
+isWithAdjust: N
+
+---------------------------------------
+parameters[9]: 
+Area: 1504000, DownSampleScale: (1, 1), (mk_y, mk_u, mk_v) = (5, 1, 2)
+PredictorID: 8, KmeansTableSize: 189, mk_table: 5, WL_max: 21
+kmeansTableBitrate: 2.75122, PSNR: 41.7348, AdjustBitrate: 0
+withAdjustBitrate: 2.75122, 2.75122, 2.75122
+isWithAdjust: N
+
+---------------------------------------
+parameters[10]: 
+Area: 1504000, DownSampleScale: (1, 1), (mk_y, mk_u, mk_v) = (5, 2, 1)
+PredictorID: 8, KmeansTableSize: 186, mk_table: 5, WL_max: 20
+kmeansTableBitrate: 2.40494, PSNR: 41.5643, AdjustBitrate: 0
+withAdjustBitrate: 2.40494, 2.40494, 2.40494
+isWithAdjust: N
+
+---------------------------------------
+parameters[11]: 
+Area: 1504000, DownSampleScale: (1, 1), (mk_y, mk_u, mk_v) = (5, 1, 1)
+PredictorID: 8, KmeansTableSize: 101, mk_table: 5, WL_max: 20
+kmeansTableBitrate: 2.32696, PSNR: 41.2463, AdjustBitrate: 0
+withAdjustBitrate: 2.32696, 2.32696, 2.32696
+isWithAdjust: N
+
+---------------------------------------
+parameters[12]: 
+Area: 1504000, DownSampleScale: (1, 1), (mk_y, mk_u, mk_v) = (5, 2, 0)
+PredictorID: 8, KmeansTableSize: 107, mk_table: 5, WL_max: 20
+kmeansTableBitrate: 2.15841, PSNR: 41.2208, AdjustBitrate: 0
+withAdjustBitrate: 2.15841, 2.15841, 2.15841
+isWithAdjust: N
+
+---------------------------------------
+parameters[13]: 
+Area: 1504000, DownSampleScale: (1, 1), (mk_y, mk_u, mk_v) = (5, 1, 0)
+PredictorID: 8, KmeansTableSize: 56, mk_table: 5, WL_max: 21
+kmeansTableBitrate: 2.08006, PSNR: 40.9027, AdjustBitrate: 0
+withAdjustBitrate: 2.08006, 2.08006, 2.08006
+isWithAdjust: N
+
+---------------------------------------
+parameters[14]: 
+Area: 1504000, DownSampleScale: (1, 1), (mk_y, mk_u, mk_v) = (5, 0, 1)
+PredictorID: 8, KmeansTableSize: 58, mk_table: 5, WL_max: 20
+kmeansTableBitrate: 2.02576, PSNR: 40.8215, AdjustBitrate: 0
+withAdjustBitrate: 2.02576, 2.02576, 2.02576
+isWithAdjust: N
+
+---------------------------------------
+parameters[15]: 
+Area: 1504000, DownSampleScale: (1, 1), (mk_y, mk_u, mk_v) = (5, 0, 0)
+PredictorID: 8, KmeansTableSize: 32, mk_table: 5, WL_max: 18
+kmeansTableBitrate: 1.77584, PSNR: 40.4779, AdjustBitrate: 0
+withAdjustBitrate: 1.77584, 1.77584, 1.77584
+isWithAdjust: N
+
+---------------------------------------
+parameters[16]: 
+Area: 1504000, DownSampleScale: (1, 1), (mk_y, mk_u, mk_v) = (4, 2, 0)
+PredictorID: 8, KmeansTableSize: 56, mk_table: 5, WL_max: 19
+kmeansTableBitrate: 1.70927, PSNR: 37.3437, AdjustBitrate: 0
+withAdjustBitrate: 1.70927, 1.70927, 1.70927
+isWithAdjust: N
+
+---------------------------------------
+parameters[17]: 
+Area: 1504000, DownSampleScale: (1, 1), (mk_y, mk_u, mk_v) = (4, 1, 0)
+PredictorID: 8, KmeansTableSize: 29, mk_table: 5, WL_max: 19
+kmeansTableBitrate: 1.63877, PSNR: 37.0256, AdjustBitrate: 0
+withAdjustBitrate: 1.63877, 1.63877, 1.63877
+isWithAdjust: N
+
+---------------------------------------
+parameters[18]: 
+Area: 1504000, DownSampleScale: (1, 1), (mk_y, mk_u, mk_v) = (4, 0, 1)
+PredictorID: 8, KmeansTableSize: 30, mk_table: 5, WL_max: 19
+kmeansTableBitrate: 1.59423, PSNR: 36.9444, AdjustBitrate: 0
+withAdjustBitrate: 1.59423, 1.59423, 1.59423
+isWithAdjust: N
+
+---------------------------------------
+parameters[19]: 
+Area: 1504000, DownSampleScale: (1, 1), (mk_y, mk_u, mk_v) = (4, 0, 0)
+PredictorID: 8, KmeansTableSize: 16, mk_table: 4, WL_max: 15
+kmeansTableBitrate: 1.39823, PSNR: 36.6009, AdjustBitrate: 0
+withAdjustBitrate: 1.39823, 1.39823, 1.39823
+isWithAdjust: N
+
+---------------------------------------
+parameters[20]: 
+Area: 752000, DownSampleScale: (1, 2), (mk_y, mk_u, mk_v) = (5, 2, 1)
+PredictorID: 8, KmeansTableSize: 205, mk_table: 5, WL_max: 20
+kmeansTableBitrate: 2.48147, PSNR: 34.2762, AdjustBitrate: 0
+withAdjustBitrate: 1.24073, 1.24073, 1.24073
+isWithAdjust: N
+
+---------------------------------------
+parameters[21]: 
+Area: 752000, DownSampleScale: (1, 2), (mk_y, mk_u, mk_v) = (5, 2, 0)
+PredictorID: 8, KmeansTableSize: 114, mk_table: 5, WL_max: 20
+kmeansTableBitrate: 2.3885, PSNR: 34.074, AdjustBitrate: 0
+withAdjustBitrate: 1.19425, 1.19425, 1.19425
+isWithAdjust: N
+
+---------------------------------------
+parameters[22]: 
+Area: 752000, DownSampleScale: (1, 2), (mk_y, mk_u, mk_v) = (5, 1, 0)
+PredictorID: 8, KmeansTableSize: 62, mk_table: 5, WL_max: 18
+kmeansTableBitrate: 2.30201, PSNR: 33.8695, AdjustBitrate: 0
+withAdjustBitrate: 1.15101, 1.15101, 1.15101
+isWithAdjust: N
+
+---------------------------------------
+parameters[23]: 
+Area: 752000, DownSampleScale: (1, 2), (mk_y, mk_u, mk_v) = (5, 0, 1)
+PredictorID: 8, KmeansTableSize: 62, mk_table: 5, WL_max: 19
+kmeansTableBitrate: 2.08386, PSNR: 33.7214, AdjustBitrate: 0
+withAdjustBitrate: 1.04193, 1.04193, 1.04193
+isWithAdjust: N
+
+---------------------------------------
+parameters[24]: 
+Area: 752000, DownSampleScale: (1, 2), (mk_y, mk_u, mk_v) = (5, 0, 0)
+PredictorID: 8, KmeansTableSize: 32, mk_table: 5, WL_max: 17
+kmeansTableBitrate: 1.98791, PSNR: 33.5192, AdjustBitrate: 0
+withAdjustBitrate: 0.993957, 0.993957, 0.993957
+isWithAdjust: N
+
+---------------------------------------
+parameters[25]: 
+Area: 752000, DownSampleScale: (1, 2), (mk_y, mk_u, mk_v) = (4, 2, 1)
+PredictorID: 8, KmeansTableSize: 110, mk_table: 5, WL_max: 19
+kmeansTableBitrate: 1.92894, PSNR: 33.4791, AdjustBitrate: 0
+withAdjustBitrate: 0.964472, 0.964472, 0.964472
+isWithAdjust: N
+
+---------------------------------------
+parameters[26]: 
+Area: 752000, DownSampleScale: (1, 2), (mk_y, mk_u, mk_v) = (4, 2, 0)
+PredictorID: 8, KmeansTableSize: 61, mk_table: 5, WL_max: 19
+kmeansTableBitrate: 1.84335, PSNR: 33.2769, AdjustBitrate: 0
+withAdjustBitrate: 0.921676, 0.921676, 0.921676
+isWithAdjust: N
+
+---------------------------------------
+parameters[27]: 
+Area: 376000, DownSampleScale: (2, 2), (mk_y, mk_u, mk_v) = (5, 2, 2)
+PredictorID: 8, KmeansTableSize: 391, mk_table: 7, WL_max: 19
+kmeansTableBitrate: 3.23951, PSNR: 33.2665, AdjustBitrate: 0
+withAdjustBitrate: 0.809879, 0.809879, 0.809879
+isWithAdjust: N
+
+---------------------------------------
+parameters[28]: 
+Area: 376000, DownSampleScale: (2, 2), (mk_y, mk_u, mk_v) = (5, 1, 2)
+PredictorID: 8, KmeansTableSize: 237, mk_table: 5, WL_max: 19
+kmeansTableBitrate: 3.09127, PSNR: 33.0701, AdjustBitrate: 0
+withAdjustBitrate: 0.772818, 0.772818, 0.772818
+isWithAdjust: N
+
+---------------------------------------
+parameters[29]: 
+Area: 376000, DownSampleScale: (2, 2), (mk_y, mk_u, mk_v) = (5, 2, 1)
+PredictorID: 8, KmeansTableSize: 234, mk_table: 5, WL_max: 19
+kmeansTableBitrate: 2.84845, PSNR: 33.0468, AdjustBitrate: 0
+withAdjustBitrate: 0.712112, 0.712112, 0.712112
+isWithAdjust: N
+
+---------------------------------------
+parameters[30]: 
+Area: 376000, DownSampleScale: (2, 2), (mk_y, mk_u, mk_v) = (5, 1, 1)
+PredictorID: 8, KmeansTableSize: 127, mk_table: 5, WL_max: 19
+kmeansTableBitrate: 2.69943, PSNR: 32.8504, AdjustBitrate: 0
+withAdjustBitrate: 0.674857, 0.674857, 0.674857
+isWithAdjust: N
+
+---------------------------------------
+parameters[31]: 
+Area: 376000, DownSampleScale: (2, 2), (mk_y, mk_u, mk_v) = (5, 2, 0)
+PredictorID: 8, KmeansTableSize: 125, mk_table: 5, WL_max: 19
+kmeansTableBitrate: 2.57145, PSNR: 32.796, AdjustBitrate: 0
+withAdjustBitrate: 0.642862, 0.642862, 0.642862
+isWithAdjust: N
+
+---------------------------------------
+parameters[32]: 
+Area: 376000, DownSampleScale: (2, 2), (mk_y, mk_u, mk_v) = (4, 2, 2)
+PredictorID: 8, KmeansTableSize: 218, mk_table: 5, WL_max: 19
+kmeansTableBitrate: 2.56413, PSNR: 32.7066, AdjustBitrate: 0
+withAdjustBitrate: 0.641032, 0.641032, 0.641032
+isWithAdjust: N
+
+---------------------------------------
+parameters[33]: 
+Area: 376000, DownSampleScale: (2, 2), (mk_y, mk_u, mk_v) = (5, 1, 0)
+PredictorID: 8, KmeansTableSize: 64, mk_table: 5, WL_max: 17
+kmeansTableBitrate: 2.42456, PSNR: 32.5996, AdjustBitrate: 0
+withAdjustBitrate: 0.60614, 0.60614, 0.60614
+isWithAdjust: N
+
+---------------------------------------
+parameters[34]: 
+Area: 376000, DownSampleScale: (2, 2), (mk_y, mk_u, mk_v) = (4, 1, 2)
+PredictorID: 8, KmeansTableSize: 123, mk_table: 5, WL_max: 19
+kmeansTableBitrate: 2.41521, PSNR: 32.5102, AdjustBitrate: 0
+withAdjustBitrate: 0.603802, 0.603802, 0.603802
+isWithAdjust: N
+
+---------------------------------------
+parameters[35]: 
+Area: 376000, DownSampleScale: (2, 2), (mk_y, mk_u, mk_v) = (4, 2, 1)
+PredictorID: 8, KmeansTableSize: 126, mk_table: 5, WL_max: 18
+kmeansTableBitrate: 2.20511, PSNR: 32.4869, AdjustBitrate: 0
+withAdjustBitrate: 0.551276, 0.551276, 0.551276
+isWithAdjust: N
+
+---------------------------------------
+parameters[36]: 
+Area: 376000, DownSampleScale: (2, 2), (mk_y, mk_u, mk_v) = (4, 1, 1)
+PredictorID: 8, KmeansTableSize: 64, mk_table: 5, WL_max: 17
+kmeansTableBitrate: 2.06916, PSNR: 32.2905, AdjustBitrate: 0
+withAdjustBitrate: 0.51729, 0.51729, 0.51729
+isWithAdjust: N
+
+---------------------------------------
+parameters[37]: 
+Area: 376000, DownSampleScale: (2, 2), (mk_y, mk_u, mk_v) = (4, 2, 0)
+PredictorID: 8, KmeansTableSize: 64, mk_table: 5, WL_max: 18
+kmeansTableBitrate: 1.95697, PSNR: 32.2361, AdjustBitrate: 0
+withAdjustBitrate: 0.489242, 0.489242, 0.489242
+isWithAdjust: N
+
+---------------------------------------
+parameters[38]: 
+Area: 376000, DownSampleScale: (2, 2), (mk_y, mk_u, mk_v) = (4, 1, 0)
+PredictorID: 8, KmeansTableSize: 32, mk_table: 4, WL_max: 15
+kmeansTableBitrate: 1.81865, PSNR: 32.0397, AdjustBitrate: 0
+withAdjustBitrate: 0.454664, 0.454664, 0.454664
+isWithAdjust: N
+
+---------------------------------------
+parameters[39]: 
+Area: 376000, DownSampleScale: (2, 2), (mk_y, mk_u, mk_v) = (4, 0, 0)
+PredictorID: 8, KmeansTableSize: 16, mk_table: 4, WL_max: 10
+kmeansTableBitrate: 1.64132, PSNR: 31.7171, AdjustBitrate: 0
+withAdjustBitrate: 0.41033, 0.41033, 0.41033
+isWithAdjust: N
+
+---------------------------------------
+parameters[40]: 
+Area: 376000, DownSampleScale: (2, 2), (mk_y, mk_u, mk_v) = (3, 2, 0)
+PredictorID: 8, KmeansTableSize: 32, mk_table: 4, WL_max: 15
+kmeansTableBitrate: 1.5873, PSNR: 31.0826, AdjustBitrate: 0
+withAdjustBitrate: 0.396825, 0.396825, 0.396825
+isWithAdjust: N
+
+---------------------------------------
+parameters[41]: 
+Area: 376000, DownSampleScale: (2, 2), (mk_y, mk_u, mk_v) = (3, 1, 0)
+PredictorID: 8, KmeansTableSize: 16, mk_table: 4, WL_max: 12
+kmeansTableBitrate: 1.46935, PSNR: 30.8862, AdjustBitrate: 0
+withAdjustBitrate: 0.367336, 0.367336, 0.367336
+isWithAdjust: N
+
+---------------------------------------
+parameters[42]: 
+Area: 376000, DownSampleScale: (2, 2), (mk_y, mk_u, mk_v) = (3, 0, 0)
+PredictorID: 8, KmeansTableSize: 8, mk_table: 3, WL_max: 7
+kmeansTableBitrate: 1.32981, PSNR: 30.5636, AdjustBitrate: 0
+withAdjustBitrate: 0.332453, 0.332453, 0.332453
+isWithAdjust: N
+
+---------------------------------------
+parameters[43]: 
+Area: 376000, DownSampleScale: (2, 2), (mk_y, mk_u, mk_v) = (2, 2, 0)
+PredictorID: 8, KmeansTableSize: 16, mk_table: 4, WL_max: 12
+kmeansTableBitrate: 1.30187, PSNR: 28.3573, AdjustBitrate: 0
+withAdjustBitrate: 0.325468, 0.325468, 0.325468
+isWithAdjust: N
+
+---------------------------------------
+parameters[44]: 
+Area: 376000, DownSampleScale: (2, 2), (mk_y, mk_u, mk_v) = (2, 1, 0)
+PredictorID: 8, KmeansTableSize: 8, mk_table: 3, WL_max: 7
+kmeansTableBitrate: 1.21393, PSNR: 28.1609, AdjustBitrate: 0
+withAdjustBitrate: 0.303481, 0.303481, 0.303481
+isWithAdjust: N
+
+---------------------------------------
+parameters[45]: 
+Area: 376000, DownSampleScale: (2, 2), (mk_y, mk_u, mk_v) = (2, 0, 0)
+PredictorID: 8, KmeansTableSize: 4, mk_table: 2, WL_max: 3
+kmeansTableBitrate: 1.11908, PSNR: 27.8383, AdjustBitrate: 0
+withAdjustBitrate: 0.27977, 0.27977, 0.27977
+isWithAdjust: N
+
+---------------------------------------
+parameters[46]: 
+Area: 376000, DownSampleScale: (2, 2), (mk_y, mk_u, mk_v) = (1, 1, 0)
+PredictorID: 8, KmeansTableSize: 4, mk_table: 2, WL_max: 3
+kmeansTableBitrate: 1.07322, PSNR: 24.7782, AdjustBitrate: 0
+withAdjustBitrate: 0.268304, 0.268304, 0.268304
+isWithAdjust: N
+
+---------------------------------------
+parameters[47]: 
+Area: 376000, DownSampleScale: (2, 2), (mk_y, mk_u, mk_v) = (1, 0, 0)
+PredictorID: 8, KmeansTableSize: 2, mk_table: 2, WL_max: 1
+kmeansTableBitrate: 1, PSNR: 24.4556, AdjustBitrate: 0
+withAdjustBitrate: 0.25, 0.25, 0.25
+isWithAdjust: N
+
+---------------------------------------
