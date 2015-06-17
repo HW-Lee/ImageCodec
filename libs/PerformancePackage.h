@@ -19,6 +19,7 @@ class CompressionParameters {
 public:
 	static CompressionParameters* Builder();
 	CompressionParameters* withArea(long area);
+	CompressionParameters* withDownSampleScale(int wscale, int hscale);
 	CompressionParameters* withMk_YUV(int m_y, int m_u, int m_v);
 	CompressionParameters* withPredictorID(int predictorID);
 	CompressionParameters* withKmeansTableSize(int N_k);
@@ -38,6 +39,8 @@ public:
 	double afterAdjust(int format);
 
 	long imageArea;
+	int wscale;
+	int hscale;
 	int mk_y, mk_u, mk_v;
 	int predictorID;
 	int N_k;
@@ -58,6 +61,7 @@ private:
 CompressionParameters::CompressionParameters() { withAdjust(false); }
 CompressionParameters* CompressionParameters::Builder() { return new CompressionParameters(); }
 CompressionParameters* CompressionParameters::withArea(long area) { this->imageArea = area; return this; }
+CompressionParameters* CompressionParameters::withDownSampleScale(int wscale, int hscale) { this->wscale = wscale; this->hscale = hscale; return this; }
 CompressionParameters* CompressionParameters::withMk_YUV(int m_y, int m_u, int m_v) { this->mk_y = m_y; this->mk_u = m_u; this->mk_v = m_v; return this; }
 CompressionParameters* CompressionParameters::withPredictorID(int predictorID) { this->predictorID = predictorID; return this; }
 CompressionParameters* CompressionParameters::withKmeansTableSize(int N_k) { this->N_k = N_k; return this; }
@@ -71,6 +75,7 @@ CompressionParameters* CompressionParameters::withResidualQuantizationConst(int 
 CompressionParameters* CompressionParameters::withPSNR(double PSNR) { this->PSNR = PSNR; return this; }
 CompressionParameters* CompressionParameters::clone() {
 	return Builder()->withArea(imageArea)
+					->withDownSampleScale(wscale, hscale)
 					->withMk_YUV(mk_y, mk_u, mk_v)
 					->withPredictorID(predictorID)
 					->withKmeansTableSize(N_k)
@@ -85,6 +90,7 @@ CompressionParameters* CompressionParameters::clone() {
 
 void CompressionParameters::info() {
 	cout << "Area: " << this->imageArea << ", ";
+	cout << "DownSampleScale: (" << wscale << ", " << hscale << ")" << ", ";
 	cout << "(mk_y, mk_u, mk_v) = (" << mk_y << ", " << mk_u << ", " << mk_v << ")" << endl;
 	cout << "PredictorID: " << predictorID << ", " << "KmeansTableSize: " << N_k << ", ";
 	cout << "mk_table: " << mk_table << ", " << "WL_max: " << WL_max << endl;
@@ -115,9 +121,9 @@ long CompressionParameters::bitsCount() {
 }
 
 double CompressionParameters::afterAdjust(int format) {
-	if (format == YUVImage::FORMAT_4_4_4) return ( adjustBitrate + kmeansTableBitrate/3.0 );
-	else if (format == YUVImage::FORMAT_4_2_2) return ( adjustBitrate + kmeansTableBitrate/2.0 );
-	else return ( adjustBitrate + kmeansTableBitrate/1.5 );
+	if (format == YUVImage::FORMAT_4_4_4) return ( adjustBitrate*3.0 + kmeansTableBitrate ) / (wscale*hscale);
+	else if (format == YUVImage::FORMAT_4_2_2) return ( adjustBitrate*2.0 + kmeansTableBitrate ) / (wscale*hscale);
+	else return ( adjustBitrate*1.5 + kmeansTableBitrate ) / (wscale*hscale);
 }
 
 class PerformancePackage {
@@ -174,24 +180,29 @@ void PerformancePackage::submit(CompressionParameters* par) {
 	// par->info();
 	// cout << "--------------------------" << endl;
 	if (this->parameters.size() == 0) { this->parameters.push_back(par->clone()); return; }
-	int minSearchIdx = 0;
-	int maxSearchIdx = (this->parameters.size() > 0) ? this->parameters.size()-1:0;
-	while (maxSearchIdx - minSearchIdx > 1) {
-		int curSearchIdx = (minSearchIdx + maxSearchIdx)/2;
-		if (this->parameters[curSearchIdx]->PSNR > par->PSNR) { minSearchIdx = curSearchIdx; }
-		else if (this->parameters[curSearchIdx]->PSNR < par->PSNR) { maxSearchIdx = curSearchIdx; }
-		else { minSearchIdx = curSearchIdx; maxSearchIdx = curSearchIdx; }
+	int searchIdx = 0;
+	for (int i = 0; i < this->parameters.size(); i++) {
+		if (this->parameters[i]->PSNR < par->PSNR) { this->parameters.insert(this->parameters.begin()+i, par->clone()); return; }
 	}
-	double parBitrate = (par->isWithAdjust) ? par->afterAdjust(YUVImage::FORMAT_4_2_0):par->kmeansTableBitrate;
-	double minBitrate = this->parameters[minSearchIdx]->isWithAdjust ? 
-			this->parameters[minSearchIdx]->afterAdjust(YUVImage::FORMAT_4_2_0) : this->parameters[minBitrate]->kmeansTableBitrate;
-	double maxBitrate = this->parameters[maxSearchIdx]->isWithAdjust ? 
-			this->parameters[maxSearchIdx]->afterAdjust(YUVImage::FORMAT_4_2_0) : this->parameters[maxSearchIdx]->kmeansTableBitrate;
-	if (this->parameters[minSearchIdx]->PSNR == par->PSNR && parBitrate < minBitrate) { this->parameters[minBitrate] = par->clone(); }
-	else if (this->parameters[maxSearchIdx]->PSNR == par->PSNR && parBitrate < maxBitrate) { this->parameters[maxBitrate] = par->clone(); }
-	else if (this->parameters[minSearchIdx]->PSNR < par->PSNR) { this->parameters.insert(this->parameters.begin()+minSearchIdx, par->clone()); }
-	else if (this->parameters[maxSearchIdx]->PSNR > par->PSNR) { this->parameters.push_back(par->clone()); }
-	else { this->parameters.insert(this->parameters.begin()+maxSearchIdx, par->clone()); }
+	this->parameters.push_back(par->clone());
+	// int minSearchIdx = 0;
+	// int maxSearchIdx = (this->parameters.size() > 0) ? this->parameters.size()-1:0;
+	// while (maxSearchIdx - minSearchIdx > 1) {
+	// 	int curSearchIdx = (minSearchIdx + maxSearchIdx)/2;
+	// 	if (this->parameters[curSearchIdx]->PSNR > par->PSNR) { minSearchIdx = curSearchIdx; }
+	// 	else if (this->parameters[curSearchIdx]->PSNR < par->PSNR) { maxSearchIdx = curSearchIdx; }
+	// 	else { minSearchIdx = curSearchIdx; maxSearchIdx = curSearchIdx; }
+	// }
+	// double parBitrate = (par->isWithAdjust) ? par->afterAdjust(YUVImage::FORMAT_4_2_0):par->kmeansTableBitrate;
+	// double minBitrate = this->parameters[minSearchIdx]->isWithAdjust ? 
+	// 		this->parameters[minSearchIdx]->afterAdjust(YUVImage::FORMAT_4_2_0) : this->parameters[minBitrate]->kmeansTableBitrate;
+	// double maxBitrate = this->parameters[maxSearchIdx]->isWithAdjust ? 
+	// 		this->parameters[maxSearchIdx]->afterAdjust(YUVImage::FORMAT_4_2_0) : this->parameters[maxSearchIdx]->kmeansTableBitrate;
+	// if (this->parameters[minSearchIdx]->PSNR == par->PSNR && parBitrate < minBitrate) { this->parameters[minBitrate] = par->clone(); }
+	// else if (this->parameters[maxSearchIdx]->PSNR == par->PSNR && parBitrate < maxBitrate) { this->parameters[maxBitrate] = par->clone(); }
+	// else if (this->parameters[minSearchIdx]->PSNR < par->PSNR) { this->parameters.insert(this->parameters.begin()+minSearchIdx, par->clone()); }
+	// else if (this->parameters[maxSearchIdx]->PSNR > par->PSNR) { this->parameters.push_back(par->clone()); }
+	// else { this->parameters.insert(this->parameters.begin()+maxSearchIdx, par->clone()); }
 }
 
 void PerformancePackage::anneal(int opt) {

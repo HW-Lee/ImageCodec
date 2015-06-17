@@ -83,6 +83,8 @@ void ImageCodec::run() {
 	 */
 	if (this->mode == DECODING) {
 		// get image information
+		int ds = this->reader->read<int>(2);
+		int wscale = ds/2 + 1; int hscale = ds%2 + 1;
 		int width = this->reader->read<int>(16);
 		int height = this->reader->read<int>(16);
 		int format;
@@ -267,7 +269,7 @@ void ImageCodec::run() {
 		string path = this->writer->getPath();
 		this->writer->close();
 		this->reader->close();
-		outputImage->exportTo(path);
+		outputImage->upSample(wscale, hscale)->exportTo(path);
 
 		delete outputImage; delete[] y_centers; delete[] u_centers; delete[] v_centers;
 		delete[] symbolValues; delete[] entries; delete[] numOffsets; delete[] rangeOffsets;
@@ -287,10 +289,10 @@ void ImageCodec::run() {
 	 */
 	} else {
 		// setup the range of m_y, m_u, m_v
-		int M_Y_RANGE[] = {2, 3, 4, 5, 6}; int K_Y_RANGE[] = {4, 8, 16, 32, 64};
-		int M_U_RANGE[] = {1, 2, 3, 4}; int K_U_RANGE[] = {2, 4, 8, 16};
-		int M_V_RANGE[] = {1, 2, 3, 4}; int K_V_RANGE[] = {2, 4, 8, 16};
-		int M_Y_RANGE_NUM = 5; int M_U_RANGE_NUM = 4; int M_V_RANGE_NUM = 4;
+		int M_Y_RANGE[] = {1, 2, 3, 4, 5, 6}; int K_Y_RANGE[] = {2, 4, 8, 16, 32, 64};
+		int M_U_RANGE[] = {0, 1, 2, 3, 4}; int K_U_RANGE[] = {1, 2, 4, 8, 16};
+		int M_V_RANGE[] = {0, 1, 2, 3, 4}; int K_V_RANGE[] = {1, 2, 4, 8, 16};
+		int M_Y_RANGE_NUM = 5; int M_U_RANGE_NUM = 3; int M_V_RANGE_NUM = 3;
 
 		int m_y; int k_y;
 		int m_u; int k_u;
@@ -308,6 +310,7 @@ void ImageCodec::run() {
 			CompressionParameters* cp = 
 					CompressionParameters::Builder()
 										->withArea(imageDataSize)
+										->withDownSampleScale(1, 1)
 										->withMk_YUV(8, 8, 8)
 										->withMk_TABLE(0)
 										->withKmeansTableBitrate(0)
@@ -328,102 +331,108 @@ void ImageCodec::run() {
 			PerformancePackage::getInstance(this->image->getPath())->submit(cp);
 			delete cp;
 			delete[] c;
-			for (int iy = 0; iy < M_Y_RANGE_NUM; iy++) {
-				m_y = M_Y_RANGE[iy]; k_y = K_Y_RANGE[iy];
-				cout << "tuning parameters: " << (double)iy / M_Y_RANGE_NUM * 100.0 << "%" << endl;
-				if (k_y*2 > this->image->getMax(DataLayer::Y)-this->image->getMin(DataLayer::Y)) continue;
-				for (int iu = 0; iu < M_U_RANGE_NUM; iu++) {
-					m_u = M_U_RANGE[iu]; k_u = K_U_RANGE[iu];
-					if (k_u*2 > this->image->getMax(DataLayer::Cb)-this->image->getMin(DataLayer::Cb)) continue;
-					for (int iv = 0; iv < M_V_RANGE_NUM; iv++) {
-						m_v = M_V_RANGE[iv]; k_v = K_V_RANGE[iv];
-						if (k_v*2 > this->image->getMax(DataLayer::Cr)-this->image->getMin(DataLayer::Cr)) continue;
-						// if (m_y != 5 || m_u != 2 || m_v != 1) continue;
+			for (int ds = 0; ds < 4; ds++) {
+				cout << "tuning parameters: " << (double)ds / 4 * 100.0 << "%" << endl;
+				YUVImage* dummy = this->image->downSample(ds/2 + 1, ds%2 + 1);
+				imageDataSize = dummy->getDataSize(DataLayer::Y);
+				for (int iy = 0; iy < M_Y_RANGE_NUM; iy++) {
+					m_y = M_Y_RANGE[iy]; k_y = K_Y_RANGE[iy];
+					if (k_y*2 > dummy->getMax(DataLayer::Y)-dummy->getMin(DataLayer::Y)) continue;
+					for (int iu = 0; iu < M_U_RANGE_NUM; iu++) {
+						m_u = M_U_RANGE[iu]; k_u = K_U_RANGE[iu];
+						if (k_u*2 > dummy->getMax(DataLayer::Cb)-dummy->getMin(DataLayer::Cb)) continue;
+						for (int iv = 0; iv < M_V_RANGE_NUM; iv++) {
+							m_v = M_V_RANGE[iv]; k_v = K_V_RANGE[iv];
+							if (k_v*2 > dummy->getMax(DataLayer::Cr)-dummy->getMin(DataLayer::Cr)) continue;
+							// if (m_y != 5 || m_u != 2 || m_v != 1) continue;
 
-						YUVImageFactory* factory = 
-							YUVImageFactory::initWithImage(this->image)
-											->useQuantization()
-											->withYUVLevels(k_y, k_u, k_v)
-											->compress();
+							YUVImageFactory* factory = 
+								YUVImageFactory::initWithImage(dummy)
+												->useQuantization()
+												->withYUVLevels(k_y, k_u, k_v)
+												->compress();
 
-						YUVImage* symbImg = factory->getSymbolImage()->transformToFormat(YUVImage::FORMAT_4_4_4);
-						int symbolNum[3] = {k_y, k_u, k_v};
-						YUVImage* kmeansPredictedResImg = ImagePredictor::predictResidual(symbImg, k_predictorNo, symbolNum);
+							YUVImage* symbImg = factory->getSymbolImage()->transformToFormat(YUVImage::FORMAT_4_4_4);
+							int symbolNum[3] = {k_y, k_u, k_v};
+							YUVImage* kmeansPredictedResImg = ImagePredictor::predictResidual(symbImg, k_predictorNo, symbolNum);
 
-						int* diff_data = new int[imageDataSize];
+							int* diff_data = new int[imageDataSize];
 
-						for (int i = 0; i < imageDataSize; i++) {
-							diff_data[i] = kmeansPredictedResImg->getYDataAt<int>(i); diff_data[i] <<= m_u;
-							diff_data[i] |= kmeansPredictedResImg->getCbDataAt<int>(i); diff_data[i] <<= m_v;
-							diff_data[i] |= kmeansPredictedResImg->getCrDataAt<int>(i);
-						}
-
-						HuffmanTable<int>* table = HuffmanTable<int>::initWithSize(1 << (m_y+m_u+m_v))->withData(diff_data, imageDataSize);
-
-						int WL_max = table->getMaxWordLength();
-						int max = WL_max;
-						for (int i = 1; i <= WL_max; i++) {
-							if (table->getNumEntriesWithWordLength(i) > max) max = table->getNumEntriesWithWordLength(i);
-						}
-						int m_table = 0;
-						while (max > 0) { max >>= 1; m_table++; }
-						int N_k = table->size();
-
-						CompressionParameters* cp = 
-							CompressionParameters::Builder()
-												->withArea(imageDataSize)
-												->withMk_YUV(m_y, m_u, m_v)
-												->withPredictorID(k_predictorNo)
-												->withKmeansTableSize(N_k)
-												->withMk_TABLE(m_table)
-												->withMaxWordLength(WL_max)
-												->withKmeansTableBitrate(table->bitrate())
-												->withAdjustBitrate(0)
-												->withPSNR(this->image->calPSNR(factory->getImage()));
-
-						PerformancePackage::getInstance(this->image->getPath())->submit(cp);
-
-						// adjustment parameters tuning
-						YUVImage* resImg = this->image->clone()->diff( factory->getImage() )->diffReordering();
-
-						int res_min = resImg->getMax(DataLayer::Y);
-						if (resImg->getMax(DataLayer::Cb) < res_min) res_min = resImg->getMax(DataLayer::Cb);
-						if (resImg->getMax(DataLayer::Cr) < res_min) res_min = resImg->getMax(DataLayer::Cr);
-						res_min = (res_min+1)/2;
-
-						int tlength = resImg->getDataSize(DataLayer::Y)+resImg->getDataSize(DataLayer::Cb)+resImg->getDataSize(DataLayer::Cr);
-						int* res_data = new int[tlength];
-
-						if (res_min > 8) res_min >>= 2;
-						while (res_min > 1) {
-							YUVImage* dummy = resImg->clone();
-							for (int i = 0; i < tlength; i++) {
-								short v = resImg->getDataAt<short>(i);
-								if (v == 0) { res_data[i] = 0; continue; }
-								bool isPositive = (v % 2 == 0);
-								v = v/(2*res_min); v = 2*v; if (!isPositive && v > 0) v--;
-								res_data[i] = v;
-								dummy->setDataAt(i, (v+1)/2*2*res_min - (v % 2));
+							for (int i = 0; i < imageDataSize; i++) {
+								diff_data[i] = kmeansPredictedResImg->getYDataAt<int>(i); diff_data[i] <<= m_u;
+								diff_data[i] |= kmeansPredictedResImg->getCbDataAt<int>(i); diff_data[i] <<= m_v;
+								diff_data[i] |= kmeansPredictedResImg->getCrDataAt<int>(i);
 							}
 
-							dummy->inv_diffReordering();
+							HuffmanTable<int>* table = HuffmanTable<int>::initWithSize(1 << (m_y+m_u+m_v))->withData(diff_data, imageDataSize);
 
-							HuffmanTable<int>* resTable = HuffmanTable<int>::initWithSize(1 << 8)->withData(res_data, tlength);
-							double adjustBitrate = resTable->bitrate();
+							int WL_max = table->getMaxWordLength();
+							int max = WL_max;
+							for (int i = 1; i <= WL_max; i++) {
+								if (table->getNumEntriesWithWordLength(i) > max) max = table->getNumEntriesWithWordLength(i);
+							}
+							int m_table = 0;
+							while (max > 0) { max >>= 1; m_table++; }
+							int N_k = table->size();
 
-							cp->withAdjustBitrate(adjustBitrate)->withPSNR(
-								this->image->calPSNR(factory->getImage()->add(dummy))
-							)->withResidualQuantizationConst(res_min);
+							CompressionParameters* cp = 
+								CompressionParameters::Builder()
+													->withArea(imageDataSize)
+													->withDownSampleScale(ds/2 + 1, ds%2 + 1)
+													->withMk_YUV(m_y, m_u, m_v)
+													->withPredictorID(k_predictorNo)
+													->withKmeansTableSize(N_k)
+													->withMk_TABLE(m_table)
+													->withMaxWordLength(WL_max)
+													->withKmeansTableBitrate(table->bitrate())
+													->withAdjustBitrate(0)
+													->withPSNR(this->image->calPSNR(factory->getImage()->upSample(ds/2 + 1, ds%2 + 1)));
 
-							PerformancePackage::getInstance(this->image->getPath())->submit(cp);
-							res_min >>= 1;
-							delete dummy; delete resTable;
+							PerformancePackage::getInstance(dummy->getPath())->submit(cp);
+
+							// adjustment parameters tuning
+							YUVImage* resImg = dummy->clone()->diff( factory->getImage() )->diffReordering();
+
+							int res_min = resImg->getMax(DataLayer::Y);
+							if (resImg->getMax(DataLayer::Cb) < res_min) res_min = resImg->getMax(DataLayer::Cb);
+							if (resImg->getMax(DataLayer::Cr) < res_min) res_min = resImg->getMax(DataLayer::Cr);
+							res_min = (res_min+1)/2;
+
+							int tlength = resImg->getDataSize(DataLayer::Y)+resImg->getDataSize(DataLayer::Cb)+resImg->getDataSize(DataLayer::Cr);
+							int* res_data = new int[tlength];
+
+							if (res_min > 8) res_min >>= 2;
+							while (res_min > 1) {
+								YUVImage* res_dummy = resImg->clone();
+								for (int i = 0; i < tlength; i++) {
+									short v = resImg->getDataAt<short>(i);
+									if (v == 0) { res_data[i] = 0; continue; }
+									bool isPositive = (v % 2 == 0);
+									v = v/(2*res_min); v = 2*v; if (!isPositive && v > 0) v--;
+									res_data[i] = v;
+									res_dummy->setDataAt(i, (v+1)/2*2*res_min - (v % 2));
+								}
+
+								res_dummy->inv_diffReordering();
+
+								HuffmanTable<int>* resTable = HuffmanTable<int>::initWithSize(1 << 8)->withData(res_data, tlength);
+								double adjustBitrate = resTable->bitrate();
+
+								cp->withAdjustBitrate(adjustBitrate)->withPSNR(
+									this->image->calPSNR(factory->getImage()->add(res_dummy)->upSample(ds/2 + 1, ds%2 + 1))
+								)->withResidualQuantizationConst(res_min);
+
+								PerformancePackage::getInstance(this->image->getPath())->submit(cp);
+								res_min >>= 1;
+								delete res_dummy; delete resTable;
+							}
+
+							delete factory; delete symbImg; delete kmeansPredictedResImg; delete[] diff_data; delete table; delete cp;
+							delete resImg; delete res_data;
 						}
-
-						delete factory; delete symbImg; delete kmeansPredictedResImg; delete[] diff_data; delete table; delete cp;
-						delete resImg; delete res_data;
 					}
 				}
+				delete dummy;
 			}
 			PerformancePackage::getInstance(this->image->getPath())->anneal(this->image->getFormat());
 			cout << "tuning parameters: 100%" << endl;
@@ -470,13 +479,14 @@ void ImageCodec::run() {
 
 		// find the best predictor
 		CompressionParameters* cp = PerformancePackage::getInstance(this->image->getPath())->getParameterAt(searchStart);
+		YUVImage* dummy = this->image->downSample(cp->wscale, cp->hscale);
 		m_y = cp->mk_y; m_u = cp->mk_u; m_v = cp->mk_v;
 		k_y = (1 << m_y); k_u = (1 << m_u); k_v = (1 << m_v);
 
 		int bestPredictorNo = 0; double bestBitrate = 0;
 		for (int ipid = 1; ipid <= 8; ipid++) {
 			YUVImageFactory* factory = 
-				YUVImageFactory::initWithImage(this->image)
+				YUVImageFactory::initWithImage(dummy)
 								->useQuantization()
 								->withYUVLevels(k_y, k_u, k_v)
 								->compress();
@@ -485,7 +495,7 @@ void ImageCodec::run() {
 			int symbolNum[3] = {k_y, k_u, k_v};
 			YUVImage* kmeansPredictedResImg = ImagePredictor::predictResidual(symbImg, ipid, symbolNum);
 
-			int imageDataSize = this->image->getDataSize(DataLayer::Y);
+			int imageDataSize = dummy->getDataSize(DataLayer::Y);
 			int* diff_data = new int[imageDataSize];
 
 			for (int i = 0; i < imageDataSize; i++) {
@@ -506,7 +516,7 @@ void ImageCodec::run() {
 
 		// cout << "bestPredictorNo = " << bestPredictorNo << ", bestBitrate = " << bestBitrate << endl;
 
-		YUVImageFactory* factory = YUVImageFactory::initWithImage(this->image)
+		YUVImageFactory* factory = YUVImageFactory::initWithImage(dummy)
 													->useQuantization()
 													->withYUVLevels(k_y, k_u, k_v)
 													->compress();
@@ -516,7 +526,7 @@ void ImageCodec::run() {
 		int symbolNum[3] = {k_y, k_u, k_v};
 		YUVImage* kmeansPredictedResImg = ImagePredictor::predictResidual(symbImg, bestPredictorNo, symbolNum);
 
-		int imageDataSize = this->image->getDataSize(DataLayer::Y);
+		int imageDataSize = dummy->getDataSize(DataLayer::Y);
 		int* diff_data = new int[imageDataSize];
 
 		for (int i = 0; i < imageDataSize; i++) {
@@ -534,10 +544,11 @@ void ImageCodec::run() {
 		while (max > 0) { max >>= 1; m_table++; }
 
 		// compress the image
-		this->writer->write<int>(this->image->getWidth(DataLayer::Y), 16);
-		this->writer->write<int>(this->image->getHeight(DataLayer::Y), 16);
-		if (this->image->getFormat() == YUVImage::FORMAT_4_2_0) { this->writer->write<short>(0, 1); }
-		else if (this->image->getFormat() == YUVImage::FORMAT_4_2_2) { this->writer->write<short>(2, 2); }
+		this->writer->write<int>( (cp->wscale-1)*2 + (cp->hscale-1), 2 );
+		this->writer->write<int>(dummy->getWidth(DataLayer::Y), 16);
+		this->writer->write<int>(dummy->getHeight(DataLayer::Y), 16);
+		if (dummy->getFormat() == YUVImage::FORMAT_4_2_0) { this->writer->write<short>(0, 1); }
+		else if (dummy->getFormat() == YUVImage::FORMAT_4_2_2) { this->writer->write<short>(2, 2); }
 		else { this->writer->write<short>(3, 2); }
 
 		this->writer->write<int>(m_y, 3);
@@ -569,7 +580,7 @@ void ImageCodec::run() {
 
 		// coding adjustment data
 		if (cp->isWithAdjust) {
-			YUVImage* resImg = this->image->clone()->diff( factory->getImage() )->diffReordering();
+			YUVImage* resImg = dummy->clone()->diff( factory->getImage() )->diffReordering();
 			int Q_res = cp->Q_res;
 
 			int tlength = resImg->getDataSize(DataLayer::Y)+resImg->getDataSize(DataLayer::Cb)+resImg->getDataSize(DataLayer::Cr);
@@ -586,8 +597,8 @@ void ImageCodec::run() {
 			// resImg->exportTo("./results/resImg.yuv");
 			// factory->getSymbolImage()->exportTo("./results/factory.yuv");
 
-			// cout << "PSNR = " << this->image->calPSNR(factory->getImage()) << endl;
-			// cout << "PSNR = " << this->image->calPSNR(factory->getImage()->add(resImg->inv_diffReordering())) << endl;
+			// cout << "PSNR = " << dummy->calPSNR(factory->getImage()) << endl;
+			// cout << "PSNR = " << dummy->calPSNR(factory->getImage()->add(resImg->inv_diffReordering())) << endl;
 
 			HuffmanTable<short>* resTable = HuffmanTable<short>::initWithSize(1 << 8)->withData(res_data, tlength);
 
@@ -624,7 +635,7 @@ void ImageCodec::run() {
 
 		this->writer->close();
 
-		delete factory; delete symbImg; delete kmeansPredictedResImg; delete[] diff_data; delete kmeansTable;
+		delete factory; delete symbImg; delete kmeansPredictedResImg; delete[] diff_data; delete kmeansTable; delete dummy;
 	}
 }
 

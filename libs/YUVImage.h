@@ -74,6 +74,10 @@ public:
 	double calBitrate(string path);
 
 	YUVImage* clone();
+	YUVImage* downSample(int wscale, int hscale);
+	YUVImage* downSample(int scale);
+	YUVImage* upSample(int wscale, int hscale);
+	YUVImage* upSample(int scale);
 
 	static const int FORMAT_4_4_4;
 	static const int FORMAT_4_2_2;
@@ -103,16 +107,6 @@ private:
 
 };
 
-YUVImage* YUVImage::clone() {
-	YUVImage* img = new YUVImage(this->imgPath);
-	img->setSize(this->imgWidth, this->imgHeight);
-	img->imgFormat = this->imgFormat;
-	img->dataSize = this->dataSize;
-	img->data = new short[img->dataSize];
-	for (int i = 0; i < img->dataSize; i++) img->data[i] = this->getDataAt<short>(i);
-	return img;
-}
-
 class DataLayer { public: const static int Y, Cb, Cr; };
 const int DataLayer::Y = 0;
 const int DataLayer::Cb = 1;
@@ -125,6 +119,86 @@ const int YUVImage::FORMAT_4_2_0 = 2;
 const string YUVImage::FORMAT_4_4_4_STR = "4:4:4";
 const string YUVImage::FORMAT_4_2_2_STR = "4:2:2";
 const string YUVImage::FORMAT_4_2_0_STR = "4:2:0";
+
+YUVImage* YUVImage::clone() {
+	YUVImage* img = new YUVImage(this->imgPath);
+	img->setSize(this->imgWidth, this->imgHeight);
+	img->imgFormat = this->imgFormat;
+	img->dataSize = this->dataSize;
+	img->data = new short[img->dataSize];
+	for (int i = 0; i < img->dataSize; i++) img->data[i] = this->getDataAt<short>(i);
+	return img;
+}
+
+YUVImage* YUVImage::upSample(int wscale, int hscale) {
+	if (wscale == 1 && hscale == 1) { return this->clone(); }
+	YUVImage* img = emptyImage(this->getPath(), imgWidth*wscale, imgHeight*hscale, this->getFormat());
+	for (int x = 0; x < this->getWidth(DataLayer::Y); x++) {
+		for (int y = 0; y < this->getHeight(DataLayer::Y); y++) {
+			for (int xs = 0; xs < wscale; xs++)
+				for (int ys = 0; ys < hscale; ys++)
+					img->setYDataAt(x*wscale+xs, y*hscale+ys, this->getYDataAt<short>(x, y));
+		}
+	}
+	for (int x = 0; x < this->getWidth(DataLayer::Cb); x++) {
+		for (int y = 0; y < this->getHeight(DataLayer::Cb); y++) {
+			for (int xs = 0; xs < wscale; xs++)
+				for (int ys = 0; ys < hscale; ys++)
+					img->setCbDataAt(x*wscale+xs, y*hscale+ys, this->getCbDataAt<short>(x, y));
+		}
+	}
+	for (int x = 0; x < this->getWidth(DataLayer::Cr); x++) {
+		for (int y = 0; y < this->getHeight(DataLayer::Cr); y++) {
+			for (int xs = 0; xs < wscale; xs++)
+				for (int ys = 0; ys < hscale; ys++)
+					img->setCrDataAt(x*wscale+xs, y*hscale+ys, this->getCrDataAt<short>(x, y));
+		}
+	}
+	return img;
+}
+
+YUVImage* YUVImage::downSample(int wscale, int hscale) {
+	if (wscale == 1 && hscale == 1) { return this->clone(); }
+	YUVImage* img = emptyImage(this->getPath(), imgWidth/wscale, imgHeight/hscale, this->getFormat());
+	short* v = new short[wscale*hscale];
+	for (int x = 0; x < img->getWidth(DataLayer::Y); x++) {
+		for (int y = 0; y < img->getHeight(DataLayer::Y); y++) {
+			for (int xs = 0; xs < wscale; xs++)
+				for (int ys = 0; ys < hscale; ys++)
+					v[ys*wscale+xs] = this->getYDataAt<short>(x*wscale+xs, y*hscale+ys);
+			for (int i = 0; i < wscale*hscale-1; i++)
+				for (int j = i+1; j < wscale*hscale; j++)
+					if (v[i] > v[j]) { short temp = v[i]; v[i] = v[j]; v[j] = temp; }
+			img->setYDataAt(x, y, v[wscale*hscale/2]);
+		}
+	}
+	for (int x = 0; x < img->getWidth(DataLayer::Cb); x++) {
+		for (int y = 0; y < img->getHeight(DataLayer::Cb); y++) {
+			for (int xs = 0; xs < wscale; xs++)
+				for (int ys = 0; ys < hscale; ys++)
+					v[ys*wscale+xs] = this->getCbDataAt<short>(x*wscale+xs, y*hscale+ys);
+			for (int i = 0; i < wscale*hscale-1; i++)
+				for (int j = i+1; j < wscale*hscale; j++)
+					if (v[i] > v[j]) { short temp = v[i]; v[i] = v[j]; v[j] = temp; }
+			img->setCbDataAt(x, y, v[wscale*hscale/2]);
+		}
+	}
+	for (int x = 0; x < img->getWidth(DataLayer::Cr); x++) {
+		for (int y = 0; y < img->getHeight(DataLayer::Cr); y++) {
+			for (int xs = 0; xs < wscale; xs++)
+				for (int ys = 0; ys < hscale; ys++)
+					v[ys*wscale+xs] = this->getCrDataAt<short>(x*wscale+xs, y*hscale+ys);
+			for (int i = 0; i < wscale*hscale-1; i++)
+				for (int j = i+1; j < wscale*hscale; j++)
+					if (v[i] > v[j]) { short temp = v[i]; v[i] = v[j]; v[j] = temp; }
+			img->setCrDataAt(x, y, v[wscale*hscale/2]);
+		}
+	}
+	return img;
+}
+
+YUVImage* YUVImage::downSample(int scale) { return this->downSample(scale, scale); }
+YUVImage* YUVImage::upSample(int scale) { return this->upSample(scale, scale); }
 
 YUVImage* YUVImage::import(string path) { return new YUVImage(path); }
 YUVImage* YUVImage::withSize(int width, int height) { this->setSize(width, height); if (this->isSetup()) this->startImport(); return this; }
@@ -259,7 +333,7 @@ double YUVImage::calBitrate(string path) {
 	streamsize size;
 	if (file.is_open()) {
 		size = file.tellg();
-		return 8.0*size / this->dataSize;
+		return 8.0*size / this->getDataSize(DataLayer::Y);
 	}
 	return -1;
 }
