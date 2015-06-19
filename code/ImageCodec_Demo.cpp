@@ -23,7 +23,7 @@ int main(int argc, const char * argv[]) {
 
 	int constWay = CONSTRAINT_BY_BITRATE;
 
-	int opt = 3;
+	int opt = 0;
 	string PATHS[] = {
 		"./data/1_1536x1024.yuv",
 		"./data/2_1024x768.yuv",
@@ -66,9 +66,12 @@ int main(int argc, const char * argv[]) {
 	}
 
 	ss.str(""); ss.clear(); ss << PATHS[opt+4] << "ParameterInfo.txt";
-	ofstream s(ss.str().c_str(), ios::out | ios::app);
-	PerformancePackage::getInstance(path)->info(s);
-	s.close();
+	if (constWay != SKIP_ENCODING) {
+		remove(ss.str().c_str());
+		ofstream s(ss.str().c_str(), ios::out | ios::app);
+		PerformancePackage::getInstance(path)->info(s);
+		s.close();
+	}
 
 	YUVImage* img2;
 

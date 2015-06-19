@@ -16,6 +16,7 @@
 class ImagePredictor {
 public:
 	static YUVImage* predictResidual(YUVImage* originImg, int predictorNo, int* symbolNum);
+	static YUVImage* predictResidual(YUVImage* originImg, int predictorNo);
 
 	template <class T>
 	static T getPrediction(T A, T B, T C, int predictorNo, T k);
@@ -62,6 +63,15 @@ T ImagePredictor::circularPositive(T v, T k) {
 	T vp = v;
 	while (vp < 0) { vp += k; }
 	return vp;
+}
+
+YUVImage* ImagePredictor::predictResidual(YUVImage* originImg, int predictorNo) {
+	int* v = new int[3]; v[0] = 512; v[1] = 512; v[2] = 512;
+	YUVImage* image = predictResidual(originImg, predictorNo, v);
+	for (int i = 0; i < image->getDataSize(); i++) {
+		if (image->getDataAt<short>(i) > 255) image->setDataAt(i, image->getDataAt<short>(i) - 512);
+	}
+	return image;
 }
 
 YUVImage* ImagePredictor::predictResidual(YUVImage* originImg, int predictorNo, int* symbolNum) {

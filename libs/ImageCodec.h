@@ -239,7 +239,7 @@ void ImageCodec::run() {
 
 			int data_cnt = 0;
 			std::vector<char> v;
-			int tlength = outputImage->getDataSize(DataLayer::Y)+outputImage->getDataSize(DataLayer::Cb)+outputImage->getDataSize(DataLayer::Cr);
+			int tlength = outputImage->getDataSize();
 			while (data_cnt < tlength) {
 				if (this->reader->remains() == 0) break;
 				v.push_back(this->reader->read());
@@ -304,7 +304,7 @@ void ImageCodec::run() {
 		if (PerformancePackage::getInstance(this->image->getPath())->getParametersCount() == 0) {
 			// lossless bit rate
 			int imageDataSize = this->image->getDataSize(DataLayer::Y);
-			int l = this->image->getDataSize(DataLayer::Y)+this->image->getDataSize(DataLayer::Cb)+this->image->getDataSize(DataLayer::Cr);
+			int l = this->image->getDataSize();
 			int* c = new int[3]; c[0] = 256; c[1] = 256; c[2] = 256;
 			short* imgData = new short[l];
 			CompressionParameters* cp = 

@@ -12,6 +12,7 @@
 #include <iostream>
 #include <fstream>
 #include <math.h>
+#include "Transform.h"
 
 using namespace std;
 
@@ -32,6 +33,7 @@ public:
 
 	YUVImage* diff(YUVImage* image);
 	YUVImage* add(YUVImage* image);
+	YUVImage* decorrelate();
 
 	int getWidth(int opt);
 	int getHeight(int opt);
@@ -68,6 +70,7 @@ public:
 	void setDataAt(int idx, short d);
 
 	int getDataSize(int opt);
+	int getDataSize();
 	int getFormat();
 
 	double calPSNR(YUVImage* image);
@@ -300,6 +303,12 @@ YUVImage* YUVImage::add(YUVImage* image) {
 	return addedImg;
 }
 
+YUVImage* YUVImage::decorrelate() {
+	YUVImage* img = this->clone();
+	Transform::dct4<short>(img->data, img->dataSize);
+	return img;
+}
+
 void YUVImage::exportTo(string path) {
 	remove(path.c_str());
 	ofstream file(path.c_str(), ios::out|ios::app|ios::binary);
@@ -482,9 +491,8 @@ double YUVImage::calPSNR(YUVImage* image) {
 	return PSNR;
 }
 
-int YUVImage::getDataSize(int opt) {
-	return this->getWidth(opt)*this->getHeight(opt);
-}
+int YUVImage::getDataSize(int opt) { return this->getWidth(opt)*this->getHeight(opt); }
+int YUVImage::getDataSize() { return this->dataSize; }
 
 YUVImage::YUVImage(string path) { 
 	this->imgWidth = -1; this->imgHeight = -1; this->imgFormat = -1; this->data = 0; this->dataSize = -1; this->imgPath = path; 
