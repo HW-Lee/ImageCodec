@@ -203,3 +203,17 @@ BD_curve_4 = [ ...,
 0.268304, 24.7782;
 0.25, 24.4556;
 ];
+
+data = BD_curve_1;
+hold on;
+plot(data(data(:, 1) < 1, 2), data(data(:, 1) < 1, 1), 'bo-');
+data = BD_curve_2;
+plot(data(data(:, 1) < 1, 2), data(data(:, 1) < 1, 1), 'ro-');
+data = BD_curve_3;
+plot(data(data(:, 1) < 1, 2), data(data(:, 1) < 1, 1), 'go-');
+data = BD_curve_4;
+plot(data(data(:, 1) < 1, 2), data(data(:, 1) < 1, 1), 'ko-');
+hold off;
+legend('image1', 'image2', 'image3', 'image4', 'Location', 'northwest');
+xlabel('PSNR'); ylabel('Bitrate (bpp)');
+grid;
