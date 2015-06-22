@@ -23,7 +23,7 @@ int main(int argc, const char * argv[]) {
 
 	int constWay = CONSTRAINT_BY_BITRATE;
 
-	int opt = 0;
+	int opt = 1;
 	string PATHS[] = {
 		"./data/1_1536x1024.yuv",
 		"./data/2_1024x768.yuv",
@@ -48,6 +48,9 @@ int main(int argc, const char * argv[]) {
 							->withSize(width, height);
 	img->info();
 
+	PerformancePackage::load(img->getName());
+	// PerformancePackage::getInstance(img->getName())->info();
+
 	stringstream ss, ss1; 
 	if (constWay == CONSTRAINT_BY_PSNR) {
 		ss << PATHS[opt+4]; ss << "bitstream1.bin";
@@ -69,9 +72,11 @@ int main(int argc, const char * argv[]) {
 	if (constWay != SKIP_ENCODING) {
 		remove(ss.str().c_str());
 		ofstream s(ss.str().c_str(), ios::out | ios::app);
-		PerformancePackage::getInstance(path)->info(s);
+		PerformancePackage::getInstance(img->getName())->info(s);
 		s.close();
 	}
+
+	PerformancePackage::save();
 
 	YUVImage* img2;
 
@@ -98,7 +103,7 @@ int main(int argc, const char * argv[]) {
 
 	return 0;
 
-	PerformancePackage* pkg = PerformancePackage::getInstance(path);
+	PerformancePackage* pkg = PerformancePackage::getInstance(img->getName());
 	for (int i = 0; i < pkg->getParametersCount(); i++) {
 		cout << pkg->getParameterAt(i)->afterAdjust(YUVImage::FORMAT_4_2_0) << ", ";
 		cout << pkg->getParameterAt(i)->PSNR << ";" << endl;

@@ -13,7 +13,10 @@
 #include <math.h>
 #include <string>
 #include <fstream>
+#include <sstream>
 #include "YUVImage.h"
+#include "BitReader.h"
+#include "BitWriter.h"
 
 using namespace std;
 class CompressionParameters {
@@ -152,6 +155,9 @@ public:
 	void info();
 	void info(ofstream &s);
 
+	static void save();
+	static void load(string name);
+
 	string getName();
 	int getParametersCount();
 	CompressionParameters* getParameterAt(int idx);
@@ -159,16 +165,25 @@ public:
 private:
 	PerformancePackage(string name);
 
+	string buildPath();
+
 	static PerformancePackage** instances;
 	static int curSize;
 	static int curMaxSize;
 	std::vector<CompressionParameters*> parameters;
 	string name;
+
+	static const string CACHE_ROOT;
+	static const string CACHE_POSTFIX;
+	static const long TRUNCATED_DEC;
 };
 
 PerformancePackage** PerformancePackage::instances = new PerformancePackage*[10];
 int PerformancePackage::curSize = 0;
 int PerformancePackage::curMaxSize = 10;
+const string PerformancePackage::CACHE_ROOT = "./libs/PerformancePackageCache/";
+const string PerformancePackage::CACHE_POSTFIX = ".pp";
+const long PerformancePackage::TRUNCATED_DEC = 10000000;
 
 PerformancePackage::PerformancePackage(string name) { this->name = name; };
 string PerformancePackage::getName() { return this->name; }
@@ -225,6 +240,66 @@ void PerformancePackage::info(ofstream &s) {
 		this->parameters[i]->info(s);
 		s << endl << "---------------------------------------" << endl;
 	}
+}
+
+void PerformancePackage::save() {
+	for (int pkgIdx = 0; pkgIdx < curSize; pkgIdx++) {
+		PerformancePackage* pkg = instances[pkgIdx];
+		cout << "save to " << pkg->buildPath() << endl;
+		BitWriter* w = BitWriter::open(pkg->buildPath());
+		w->write<int>(pkg->parameters.size(), 16);
+		for (int i = 0; i < pkg->parameters.size(); i++) {
+			CompressionParameters* cp = pkg->parameters[i];
+			w->write<int>(cp->imageArea, 32);
+			w->write<int>(cp->wscale-1, 1);
+			w->write<int>(cp->hscale-1, 1);
+			w->write<int>(cp->mk_y, 4);
+			w->write<int>(cp->mk_u, 4);
+			w->write<int>(cp->mk_v, 4);
+			w->write<int>(cp->predictorID-1, 3);
+			w->write<int>(cp->N_k, 32);
+			w->write<int>(cp->mk_table, 8);
+			w->write<int>(cp->WL_max, 32);
+			w->write<long>((long)(cp->kmeansTableBitrate*TRUNCATED_DEC), 64);
+			w->write<long>((long)(cp->PSNR*TRUNCATED_DEC), 64);
+			w->write<long>((long)(cp->adjustBitrate*TRUNCATED_DEC), 64);
+			w->write<int>(cp->isWithAdjust, 1);
+			w->write<int>(cp->Q_res, 16);
+		}
+		w->close();
+	}
+}
+
+void PerformancePackage::load(string name) {
+	PerformancePackage* pkg = getInstance(name);
+	BitReader* r = BitReader::open(pkg->buildPath());
+	if (r->remains() <= 0) { remove(pkg->buildPath().c_str()); return; }
+	int parSize = r->read<int>(16);
+	CompressionParameters* cp = CompressionParameters::Builder();
+	for (int i = 0; i < parSize; i++) {
+		cp->imageArea = r->read<int>(32);
+		cp->wscale = r->read<int>(1) + 1;
+		cp->hscale = r->read<int>(1) + 1;
+		cp->mk_y = r->read<int>(4);
+		cp->mk_u = r->read<int>(4);
+		cp->mk_v = r->read<int>(4);
+		cp->predictorID = r->read<int>(3) + 1;
+		cp->N_k = r->read<int>(32);
+		cp->mk_table = r->read<int>(8);
+		cp->WL_max = r->read<int>(32);
+		cp->kmeansTableBitrate = (double)(r->read<long>(64)) / TRUNCATED_DEC;
+		cp->PSNR = (double)(r->read<long>(64)) / TRUNCATED_DEC;
+		cp->adjustBitrate = (double)(r->read<long>(64)) / TRUNCATED_DEC;
+		cp->isWithAdjust = r->read<int>(1);
+		cp->Q_res = r->read<int>(16);
+		pkg->parameters.push_back(cp->clone());
+	}
+	r->close();
+}
+
+string PerformancePackage::buildPath() {
+	stringstream ss; ss << CACHE_ROOT << name << CACHE_POSTFIX;
+	return ss.str();
 }
 
 #endif

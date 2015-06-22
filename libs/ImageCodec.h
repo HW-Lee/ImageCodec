@@ -301,7 +301,7 @@ void ImageCodec::run() {
 		int k_predictorNo = 8;
 
 		// select the best set of parameters such that the PSNR is greater than specification and the compression ratio reaches the maximum
-		if (PerformancePackage::getInstance(this->image->getPath())->getParametersCount() == 0) {
+		if (PerformancePackage::getInstance(this->image->getName())->getParametersCount() == 0) {
 			// lossless bit rate
 			int imageDataSize = this->image->getDataSize(DataLayer::Y);
 			int l = this->image->getDataSize();
@@ -328,7 +328,7 @@ void ImageCodec::run() {
 
 				delete resImg; delete t;
 			}
-			PerformancePackage::getInstance(this->image->getPath())->submit(cp);
+			PerformancePackage::getInstance(this->image->getName())->submit(cp);
 			delete cp;
 			delete[] c;
 			for (int ds = 0; ds < 4; ds++) {
@@ -388,7 +388,7 @@ void ImageCodec::run() {
 													->withAdjustBitrate(0)
 													->withPSNR(this->image->calPSNR(factory->getImage()->upSample(ds/2 + 1, ds%2 + 1)));
 
-							PerformancePackage::getInstance(dummy->getPath())->submit(cp);
+							PerformancePackage::getInstance(dummy->getName())->submit(cp);
 
 							// adjustment parameters tuning
 							YUVImage* resImg = dummy->clone()->diff( factory->getImage() )->diffReordering();
@@ -422,7 +422,7 @@ void ImageCodec::run() {
 									this->image->calPSNR(factory->getImage()->add(res_dummy)->upSample(ds/2 + 1, ds%2 + 1))
 								)->withResidualQuantizationConst(res_min);
 
-								PerformancePackage::getInstance(this->image->getPath())->submit(cp);
+								PerformancePackage::getInstance(this->image->getName())->submit(cp);
 								res_min >>= 1;
 								delete res_dummy; delete resTable;
 							}
@@ -434,13 +434,13 @@ void ImageCodec::run() {
 				}
 				delete dummy;
 			}
-			PerformancePackage::getInstance(this->image->getPath())->anneal(this->image->getFormat());
+			PerformancePackage::getInstance(this->image->getName())->anneal(this->image->getFormat());
 			cout << "tuning parameters: 100%" << endl;
 		}
 
 		// use the parameters which result in the lowest bitrate or the greatest PSNR
 		int searchStart = 1;
-		PerformancePackage* perfpkg = PerformancePackage::getInstance(this->image->getPath());
+		PerformancePackage* perfpkg = PerformancePackage::getInstance(this->image->getName());
 		if (this->minPSNR > 0) {
 			for (int i = 1; i < perfpkg->getParametersCount(); i++) {
 				if (i == perfpkg->getParametersCount()-1 && perfpkg->getParameterAt(i)->PSNR > this->minPSNR) { searchStart = i; break; }
@@ -462,7 +462,7 @@ void ImageCodec::run() {
 
 		// lossless coding (deprecated currently)
 		if (searchStart == 0) {
-			CompressionParameters* cp = PerformancePackage::getInstance(this->image->getPath())->getParameterAt(searchStart);
+			CompressionParameters* cp = PerformancePackage::getInstance(this->image->getName())->getParameterAt(searchStart);
 			int* c = new int[3]; c[0] = 256; c[1] = 256; c[2] = 256;
 			YUVImage* resImg = ImagePredictor::predictResidual(this->image, cp->predictorID, c);
 
@@ -478,7 +478,7 @@ void ImageCodec::run() {
 		}
 
 		// find the best predictor
-		CompressionParameters* cp = PerformancePackage::getInstance(this->image->getPath())->getParameterAt(searchStart);
+		CompressionParameters* cp = PerformancePackage::getInstance(this->image->getName())->getParameterAt(searchStart);
 		YUVImage* dummy = this->image->downSample(cp->wscale, cp->hscale);
 		m_y = cp->mk_y; m_u = cp->mk_u; m_v = cp->mk_v;
 		k_y = (1 << m_y); k_u = (1 << m_u); k_v = (1 << m_v);

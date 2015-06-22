@@ -43,6 +43,7 @@ public:
 	void exportTo(string path);
 
 	string getPath();
+	string getName();
 
 	template <class T>
 	T getYDataAt(int x, int y);
@@ -96,6 +97,8 @@ private:
 	void setSize(int width, int height);
 	void init();
 	int getOffset(int opt);
+
+	bool replace(std::string& str, const std::string& from, const std::string& to);
 
 	float getScale();
 
@@ -208,6 +211,13 @@ YUVImage* YUVImage::withSize(int width, int height) { this->setSize(width, heigh
 YUVImage* YUVImage::withFormat(int format) { this->imgFormat = format; if (this->isSetup()) this->startImport(); return this; }
 
 string YUVImage::getPath() { return this->imgPath; }
+
+string YUVImage::getName() {
+	string p = this->getPath();
+	this->replace(p, "./", "");
+	this->replace(p, "/", "");
+	return p;
+}
 
 YUVImage* YUVImage::emptyImage(string path, int width, int height, int format) {
 	YUVImage* image = new YUVImage(path);
@@ -489,6 +499,14 @@ double YUVImage::calPSNR(YUVImage* image) {
 	// cout << "PSNR_V = " << PSNR_V << endl;
 	// cout << "PSNR = " << PSNR << endl;
 	return PSNR;
+}
+
+bool YUVImage::replace(std::string& str, const std::string& from, const std::string& to) {
+    size_t start_pos = str.find(from);
+    if(start_pos == std::string::npos)
+        return false;
+    str.replace(start_pos, from.length(), to);
+    return true;
 }
 
 int YUVImage::getDataSize(int opt) { return this->getWidth(opt)*this->getHeight(opt); }
