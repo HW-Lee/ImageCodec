@@ -1,5 +1,7 @@
 # ImageCodec
 
+This is the final project of Video Signal Processing in NTHU, 2015, Spring, and the document is just a set of supplementary materials. It simply demonstrates how to use these source files to encode/decode an image, and how to integrate/compile the project. Because it is complex, I can only show how to use as clearly as possible. If you have any problem, please send me an e-mail. (tony123930@yahoo.com.tw)
+
 ## Requirements
 - Mac OSX [**recommended**] or UNIX (terminal and shell script used)
 - Xcode-build-tools [**recommended**] or g++ compiler
@@ -22,7 +24,7 @@
 
 ### Directly running the sample code
 
-- run `cd ~/{YOUR_DIR}/ImageCodec`
+- run `cd ~/{YOUR_DIR}/ImageCodec/`
 
 - Configuration in the sample code
 	1. check the file `/ImageCodec/code/ImageCodec_Demo.cpp`
@@ -78,7 +80,7 @@
 	3. run `./run.sh`
 
 - Use Matlab code to convert YUV to PNG
-	- run `genImage` under `/ImageCodec` on Matlab terminal
+	- run `genImage` under `/ImageCodec/` on Matlab terminal
 
 - Check the output files in `/ImageCodec/results/`
 
@@ -219,7 +221,7 @@ To save the time re-searching same parameters at same image, an database/control
 
 ## APIs List (only description and partial usage so far)
 
-### ImageCodec.h
+### ImageCodec.h (642)
 - Main component of this project: to encode/decode a file.
 
 	- Encoding
@@ -246,7 +248,7 @@ To save the time re-searching same parameters at same image, an database/control
 					->run();
 		```
 
-### YUVImage.h
+### YUVImage.h (520)
 - An object that contains lots of functions/properties that an image has.
 
 	- Importing an image
@@ -329,7 +331,7 @@ To save the time re-searching same parameters at same image, an database/control
 | dynamic | T | getCrDataAt\<T\> | int x, int y | the value at the position (x, y) in V layer |
 -->
 
-### YUVImageFactory.h
+### YUVImageFactory.h (150)
 - A toolbox to process `YUVImage`: to apply k-means clustering.
 
 	- Clustering the image
@@ -353,7 +355,7 @@ To save the time re-searching same parameters at same image, an database/control
 		factory->getVLevel(); factory->getVSymbolAt(n);
 		```
 
-### ImagePredictor.h
+### ImagePredictor.h (139)
 - A toolbox to process `YUVImage`: to generate predicted residual image with a specific predictor ID.
 
 	- Directly getting a residual image
@@ -373,7 +375,7 @@ To save the time re-searching same parameters at same image, an database/control
 
 		![predictors](./report/res/predictors.png)
 
-### Transform.h
+### Transform.h (65)
 - A toolbox to do discrete cosine transform: 4x4-block supported so far. [***not used***]
 
 	- Transformation of a vector
@@ -396,7 +398,7 @@ To save the time re-searching same parameters at same image, an database/control
 		Transform::idct4<long>(v2, 2);
 		```
 
-### KmeansFactory.h
+### KmeansFactory.h (176)
 - A toolbox to do k-means clustering.
 
 	- `KmeansFactory<T>`: all data are stored in T type.
@@ -410,7 +412,7 @@ To save the time re-searching same parameters at same image, an database/control
 										->run<int>();
 	```
 
-### HuffmanTable.h
+### HuffmanTable.h (298)
 - An object able to construct a canonical Huffman table with specific contents data.
 
 	- `HuffmanTable<T>`: all data are stored in T type.
@@ -436,7 +438,7 @@ To save the time re-searching same parameters at same image, an database/control
 		double p = table->getProbabilityAt(n);
 		```
 
-### GolombRiceTable.h
+### GolombRiceTable.h (213)
 - An object able to construct a Golomb-Rice table. [***not used***]
 
 	- `GolombRiceTable<T>`: all data are stored in T type
@@ -449,7 +451,7 @@ To save the time re-searching same parameters at same image, an database/control
 
 	- Other getters are similar to HuffmanTable's.
 
-### PerformancePackage.h
+### PerformancePackage.h (316)
 - A central controller/database to manage the efficiency and its corresponded parameters set.
 
 	- Getting database with a specific name
@@ -495,7 +497,7 @@ To save the time re-searching same parameters at same image, an database/control
 		PerformancePackage::load(name);
 		```
 
-### BitReader.h
+### BitReader.h (93)
 - A toolbox to read a file in bits level.
 
 	- Opening an input stream
@@ -526,7 +528,7 @@ To save the time re-searching same parameters at same image, an database/control
 		reader->close();
 		```
 
-### BitWriter.h
+### BitWriter.h (101)
 - A toolbox to write a file in bits level.
 
 	- Opening the output stream
@@ -553,7 +555,7 @@ To save the time re-searching same parameters at same image, an database/control
 		writer->close();
 		```
 
-### Symbol.h
+### Symbol.h (77)
 - An object that contains lots of functions/properties that a symbol has.
 
 	- `Symbol<T>`: the value of the symbol is stored in T type
@@ -567,3 +569,5 @@ To save the time re-searching same parameters at same image, an database/control
 		string wordStr = s->getWordString();
 		int wordCount = s->getWordSize();
 		```
+		
+### Total: 2790 lines
