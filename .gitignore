@@ -8,6 +8,9 @@
 # OmniGraffle files
 *.graffle*
 
+# Keynote files
+*.key*
+
 # LATEX files
 *.aux
 *.log
