@@ -6,14 +6,14 @@
 - Matlab [**recommended**] or YUV viewer
 
 
-	Note that Windows has not been tested yet, so it might take lots of time encoding an image. Please wait for it, thanks.
+	Note that Windows has not been tested yet, so it might take lots of time encoding an image. Please wait for it, thanks. <br/>
+	If you are trying to run this project on the platform other than Mac OSX, please make sure your executable (.out, .exe) is in the directory `/ImageCodec/`
 
 ## Project Structure
 - Root: `/ImageCodec/`
 - Code: `/ImageCodec/code/`, `/ImageCodec/libs/`
 - Data: `/ImageCodec/data/`
 - Generated: `/ImageCodec/results/`
-- Executable (Mac OSX supported only): `/ImageCodec/executable/`
 - Report: `/ImageCodec/report/`
 
 	Note that if user does not arrange files followed the structure mentioned above, it might cause some unknown errors.
@@ -93,7 +93,7 @@
 							->withFormat({image_format})
 							->withSize({image_width}, {image_height});
 	PerformancePackage::load(img->getName());
-	ImageCodec::encodeTo({target_path})->withImage()->withMaxBitrate({max_bitrate})->run();
+	ImageCodec::encodeTo({target_path})->withImage(img)->withMaxBitrate({max_bitrate})->run();
 	```
 
 	e.g.
@@ -114,7 +114,7 @@
 							->withFormat({image_format})
 							->withSize({image_width}, {image_height});
 	PerformancePackage::load(img->getName());
-	ImageCodec::encodeTo({target_path})->withImage()->withMinPSNR({min_PSNR})->run();
+	ImageCodec::encodeTo({target_path})->withImage(img)->withMinPSNR({min_PSNR})->run();
 	PerformancePackage::save();
 	```
 
@@ -201,13 +201,118 @@
 ## Bitstream Format (top-bottom, left-right)
 ![coding format](./report/res/codingFormat.png)
 
-## APIs List (only description so far)
+## Solution of slow parameters searching
+To save the time re-searching same parameters at same image, an database/controller has been programmed for saving these parameters. It is `/ImageCodec/libs/PerformancePackage.h`:
+
+- the parameters will be saved in `/ImageCodec/libs/PerformancePackageCache/`, that's why this project should be runned at the appropriate directory. (to avoid some potential problems)
+
+- the database is programmed as singleton, which can be identified with 'name'. In this project, the parameters are stored in the database named from `YUVImage::getName()`
+
+	i.e.
+	
+	```c++
+	YUVImage* image = YUVImage::import(mImgPath)
+									->withSize(mWidth, mHeight)
+									->withFormat(YUVImage::FORMAT_4_2_0);
+	PerformancePackage::load(image->getName());
+	```
+
+## APIs List (only description and partial usage so far)
 
 ### ImageCodec.h
 - Main component of this project: to encode/decode a file.
 
+	- Encoding
+	
+		```c++
+		ImageCodec::encodeTo({target_path})
+					->withImage({your_image})
+					->withMaxBitrate({max_bitrate})
+					->run();
+		```
+	
+		```c++
+		ImageCodec::encodeTo({target_path})
+					->withImage({your_image})
+					->withMinPSNR({min_PSNR})
+					->run();
+		```
+		
+	- Decoding
+	
+		```c++
+		ImageCodec::decode({bitstream_path})
+					->saveTo({decompressed_path})
+					->run();
+		```
+
 ### YUVImage.h
 - An object that contains lots of functions/properties that an image has.
+
+	- Importing an image
+	
+		```c++
+		YUVImage* image = 
+				YUVImage::import({image_path})
+						->withSize({image_width}, {image_height})
+						->withFormat(YUVImage::FORMAT_4_2_0);
+		```
+		
+	- Initiate an empty image
+	
+		```c++
+		YUVImage* image = YUVImage::emptyImage({assigned_path}, 
+												{image_width}, 
+												{image_height}, 
+												{image_format});
+		```
+		
+	- Save the image into a file
+
+		```c++
+		image->exportTo({tartget_path});
+		```
+		
+	- Properties
+
+		```c++
+		image->getWidth(DataLayer::Y); image->getHeight(DataLayer::Cr);
+		image->getDataSize(DataLayer::Cb);
+		image->getDataSize(); // get total size of image
+		image->getFormat(); // FORMAT_4_2_0 | FORMAT_4_2_2 | FORMAT_4_4_4
+		image->getPath();
+		image->getName();
+		```
+		
+	- Data getters & setters
+
+		```c++
+		image->getYDataAt<int>(x, y);
+		image->getCbDataAt<short>(x, y);
+		image->getCrDataAt<long>(x, y);
+		image->setYDataAt(x, y, (short)v);
+		image->setCbDataAt(x, y, (short)v);
+		image->setCrDataAt(x, y, (short)v);
+		```
+		
+	- Circular Addition/Subtraction
+
+		```c++
+		YUVImage* image3 = image1->add(image2);
+		YUVImage* image4 = image1->diff(image2);
+		```
+		
+	- Evaluate difference between two images
+
+		```c++
+		double PSNR = image1->calPSNR(image2);
+		```
+		
+	- Evaluate the compressed bitrate
+
+		```c++
+		double bitrate = image1->calBitrate({bitstream_path});
+		```
 
 <!--
 | type | return | name | parameters | description |
@@ -227,29 +332,238 @@
 ### YUVImageFactory.h
 - A toolbox to process `YUVImage`: to apply k-means clustering.
 
+	- Clustering the image
+
+		```c++
+		YUVImageFactory* factory = 
+					YUVImageFactory::initWithImage(image)
+										->useQuantization()
+										->withYUVLevels({Y_clusters}, {U_clusters}, {V_clusters})
+										->compress();
+		```
+		
+	- After clustering, all data in the image refer to cluster ID rather than magnitude. The clustered image with cluster ID can be obtained with `YUVImage* symbolImg = factory->getSymbolImage()`, and the clustered image with magnitude can be obtained with `YUVImage* clusteredImg = factory->getImage()`
+
+	- Information after clustering
+
+		```c++
+		factory->getYLevel(); // get # of Y_clusters
+		factory->getYSymbolAt(n); // get the n^th center of Y
+		factory->getULevel(); factory->getUSymbolAt(n);
+		factory->getVLevel(); factory->getVSymbolAt(n);
+		```
+
 ### ImagePredictor.h
-- A toolbox to process `YUVImage`: to generate predicted image with a specific predictor ID.
+- A toolbox to process `YUVImage`: to generate predicted residual image with a specific predictor ID.
+
+	- Directly getting a residual image
+	
+		```c++
+		YUVImage* resImg = ImagePredictor::predictResidual(image, predictorID);
+		```
+		
+	- Use circular subtraction (e.g. 1 cirSubtr_5 7 = (1-7) % 5 = 4)
+
+		```c++
+		int circularN[3] = {64, 16, 8};
+		YUVImage* resImg = ImagePredictor::predictResidual(image, predictorID, circularN);
+		```
+	
+	- Predictor ID: (only 1-8 used)
+
+		![predictors](./report/res/predictors.png)
 
 ### Transform.h
 - A toolbox to do discrete cosine transform: 4x4-block supported so far. [***not used***]
 
+	- Transformation of a vector
+
+		```c++
+		int v1[4] = {1, -1, 2, -2};
+		Transform::dct4<int>(v1);
+		
+		short v2[4] = {11, 1, -2, 1};
+		Transform::idct4<short>(v2);
+		```
+		
+	- Transformation of multiple vectors
+
+		```c++
+		int v1[12] = {1, 2, 1, 2, -1, 3, 15, 10, 0, 2, -3, -5};
+		Transform::dct4<int>(v1, 3);
+		
+		long v2[8] = {1254, -4, 11, 19, 28, 3, 2, 0};
+		Transform::idct4<long>(v2, 2);
+		```
+
 ### KmeansFactory.h
 - A toolbox to do k-means clustering.
+
+	- `KmeansFactory<T>`: all data are stored in T type.
+	- `KmeansInfo<T, centerT>`: all centers are stored in centerT type.
+
+	```c++
+	int data[65536] = {1, 4, 2, 8, 10, 16, ... };
+	KmeansFactory<int>* factory = KmeansFactory<int>::getInstance();
+	KmeansInfo<int, int>* info = factory->withRawData(data, 65536)
+										->clusterInto(4096)
+										->run<int>();
+	```
 
 ### HuffmanTable.h
 - An object able to construct a canonical Huffman table with specific contents data.
 
+	- `HuffmanTable<T>`: all data are stored in T type.
+
+	```c++
+	char data[1024] = {0, 5, 123, ... };
+	HuffmanTable<short>* table = HuffmanTable::initWithSize(256)
+												->withData(data, 1024);
+	```
+	
+	- Get maximal word length and entries value
+
+		```c++
+		int WL_max = table->getMaxWordLength();
+		for (int i = 0; i < WL_max; i++)
+			int nEntries = table->getNumEntriesWithWordLength(i+1);
+		```
+		
+	- Get symbol/probability at specific index
+
+		```c++
+		Symbol<T>* symb = table->getSymbolAt(n);
+		double p = table->getProbabilityAt(n);
+		```
+
 ### GolombRiceTable.h
 - An object able to construct a Golomb-Rice table. [***not used***]
+
+	- `GolombRiceTable<T>`: all data are stored in T type
+
+	```c++
+	GolombRiceTable<int>* table = GolombRiceTable<int>::initWithSize({size})
+														->withGroupSize({group_size})
+														->init();
+	```
+
+	- Other getters are similar to HuffmanTable's.
 
 ### PerformancePackage.h
 - A central controller/database to manage the efficiency and its corresponded parameters set.
 
+	- Getting database with a specific name
+	
+		```c++
+		PerformancePackage* pkg = PerformancePackage::getInstance(name);
+		```
+	
+	- Submitting a 'tried parameters set' to database
+
+		```c++
+		CompressionParameters* 
+				cp = Builder()->withArea(imageArea)
+							  ->withDownSampleScale(wscale, hscale)
+							  ->withMk_YUV(mk_y, mk_u, mk_v)
+							  ->withPredictorID(predictorID)
+							  ->withKmeansTableSize(N_k)
+							  ->withMk_TABLE(mk_table)
+							  ->withMaxWordLength(WL_max)
+							  ->withKmeansTableBitrate(kmeansTableBitrate)
+							  ->withAdjustBitrate(adjustBitrate)
+							  ->withResidualQuantizationConst(Q_res)
+							  ->withPSNR(PSNR)
+							  ->withAdjust(isWithAdjust);
+		pkg->submit(cp);
+		```
+	
+	- After searching all parameters, the database should eliminate some higher-bitrate and lower-PSNR (higher cost, lower efficiency) parameters set.
+
+		```c++
+		pkg->anneal();
+		```
+		
+	- Save all data into the disk
+
+		```c++
+		PerformancePackage::save();
+		```
+	
+	- Load data with a specific name
+
+		```c++
+		PerformancePackage::load(name);
+		```
+
 ### BitReader.h
 - A toolbox to read a file in bits level.
+
+	- Opening an input stream
+	
+		```c++
+		BitReader* reader = BitReader::open({stream_path});
+		```
+		
+	- Reading data (big endian)
+
+		```c++
+		char v = reader->read(); // read a bit
+		char* v = reader->read(size);
+		long v = reader->read<long>(15); // read 15 bits and store in long
+		short v = reader->read<short>(3);
+		```
+	
+	- Properties
+
+		```c++
+		int restBits = reader->remains();
+		int size = reader->getFileSize(); // in terms of bits not bytes
+		```
+		
+	- DO NOT FORGET TO CLOSE INPUT STREAM! (because it is singleton.)
+
+		```c++
+		reader->close();
+		```
 
 ### BitWriter.h
 - A toolbox to write a file in bits level.
 
+	- Opening the output stream
+	
+		```c++
+		BitWriter* writer = BitWriter::open({stream_path});
+		```
+		
+	- Writing data
+
+		```c++
+		writer->write(0);
+		
+		char v[5] = {0, 1, 1, 1, 0};
+		writer->write(v, 5);
+		
+		int k = 18;
+		writer->write<int>(k, 7); // write '0010010'
+		```
+		
+	- DO NOT FORGET TO CLOSE OUTPUT STREAM! (because it is singleton.)
+
+		```c++
+		writer->close();
+		```
+
 ### Symbol.h
 - An object that contains lots of functions/properties that a symbol has.
+
+	- `Symbol<T>`: the value of the symbol is stored in T type
+
+	- Getters
+	
+		```c++
+		Symbol<short>* s = new Symbol<short>(v);
+		short value = s->getValue();
+		std::vector<char> word = s->getWord();
+		string wordStr = s->getWordString();
+		int wordCount = s->getWordSize();
+		```
