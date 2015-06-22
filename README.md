@@ -179,12 +179,35 @@
 	double bitrate = img->calBitrate("./bitstream.bin");
 	```
 
+## Coding System
+
+- Level 1: main coding system.
+
+![level 1 coding](./report/res/codingProcessLevel1.png)
+
+- Level 2: optionally applied, for compensating PSNR.
+
+![level 2 coding](./report/res/codingProcessLevel2.png)
+
+## Work Flow
+![work flow](./report/res/codingFlow.png)
+
+1. Define the searching space. ( O(dsr x mk x pid x qres), very large! )
+2. Use all parameters to encode the file.
+3. Evaluate the bitrate and PSNR.
+4. Submit the result to `ParameterPackage`
+5. Find the best parameters set under specific constraint.
+
+## Bitstream Format (top-bottom, left-right)
+![coding format](./report/res/codingFormat.png)
 
 ## APIs List (only description so far)
 
 ### ImageCodec.h
+- Main component of this project: to encode/decode a file.
 
 ### YUVImage.h
+- An object that contains lots of functions/properties that an image has.
 
 <!--
 | type | return | name | parameters | description |
@@ -202,21 +225,31 @@
 -->
 
 ### YUVImageFactory.h
+- A toolbox to process `YUVImage`: to apply k-means clustering.
 
 ### ImagePredictor.h
+- A toolbox to process `YUVImage`: to generate predicted image with a specific predictor ID.
 
 ### Transform.h
+- A toolbox to do discrete cosine transform: 4x4-block supported so far. [***not used***]
 
 ### KmeansFactory.h
+- A toolbox to do k-means clustering.
 
 ### HuffmanTable.h
+- An object able to construct a canonical Huffman table with specific contents data.
 
 ### GolombRiceTable.h
+- An object able to construct a Golomb-Rice table. [***not used***]
 
 ### PerformancePackage.h
+- A central controller/database to manage the efficiency and its corresponded parameters set.
 
 ### BitReader.h
+- A toolbox to read a file in bits level.
 
 ### BitWriter.h
+- A toolbox to write a file in bits level.
 
 ### Symbol.h
+- An object that contains lots of functions/properties that a symbol has.
