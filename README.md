@@ -77,6 +77,9 @@
 	2. key in your pwd
 	3. run `./run.sh`
 
+- Use Matlab code to convert YUV to PNG
+	- run `genImage` under `/ImageCodec` on Matlab terminal
+
 - Check the output files in `/ImageCodec/results/`
 
 ### Encoding an image
