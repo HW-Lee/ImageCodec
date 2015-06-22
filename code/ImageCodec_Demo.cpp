@@ -23,7 +23,7 @@ int main(int argc, const char * argv[]) {
 
 	int constWay = CONSTRAINT_BY_BITRATE;
 
-	int opt = 1;
+	int opt = 0;
 	string PATHS[] = {
 		"./data/1_1536x1024.yuv",
 		"./data/2_1024x768.yuv",

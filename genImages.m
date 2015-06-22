@@ -29,6 +29,8 @@ for dirIdx = 1:length(DIRS)
             elseif fIdx == 1, name = fullfile(ROOTS{rootIdx}, DIRS{dirIdx}); outName = fullfile(ROOTS{2} ,DIRS{dirIdx}, 'original');
             else continue;
             end
+            if exist([name YUVPOSTFIX], 'file') == 0, continue;
+            end
             rgb = yuv2rgb([name YUVPOSTFIX], SIZES(dirIdx, :));
             imwrite(rgb, [outName PNGPOSTFIX]);
         end
